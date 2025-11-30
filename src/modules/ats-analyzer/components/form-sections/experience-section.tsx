@@ -1,7 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -12,22 +13,31 @@ interface ExperienceSectionProps {
 	control: Control<any>
 }
 
+const defaultEmptyExperience = {
+	bullets: [],
+	company: '',
+	current: false,
+	description: '',
+	endDate: '',
+	startDate: '',
+	title: '',
+}
+
 export function ExperienceSection({ control }: ExperienceSectionProps) {
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'content.experience',
 	})
 
+	// Auto-add first empty experience if array is empty
+	useEffect(() => {
+		if (fields.length === 0) {
+			append(defaultEmptyExperience)
+		}
+	}, [fields.length, append])
+
 	const addExperience = () => {
-		append({
-			bullets: [],
-			company: '',
-			current: false,
-			description: '',
-			endDate: '',
-			startDate: '',
-			title: '',
-		})
+		append(defaultEmptyExperience)
 	}
 
 	return (
@@ -41,14 +51,6 @@ export function ExperienceSection({ control }: ExperienceSectionProps) {
 					Add Experience
 				</Button>
 			</div>
-
-			{fields.length === 0 && (
-				<Card>
-					<CardContent className="py-12 text-center text-muted-foreground">
-						No experience entries yet. Click "Add Experience" to get started.
-					</CardContent>
-				</Card>
-			)}
 
 			{fields.map((field, index) => (
 				<Card key={field.id}>

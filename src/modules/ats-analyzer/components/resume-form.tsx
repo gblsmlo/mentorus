@@ -1,14 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form'
+import { Form } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
@@ -20,8 +13,8 @@ import { createResumeSchema, type ResumeContent } from '../schemas'
 import type { WizardStep } from '../types/wizard-types'
 import { EducationSection } from './form-sections/education-section'
 import { ExperienceSection } from './form-sections/experience-section'
-import { PersonalInfoSection } from './form-sections/personal-info-section'
 import { ProjectsSection } from './form-sections/projects-section'
+import { ResumeInfoSection } from './form-sections/resume-info-section'
 import { SkillsSection } from './form-sections/skills-section'
 import { WizardWrapper } from './wizard-wrapper'
 
@@ -43,21 +36,13 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 	const form = useForm({
 		defaultValues: initialData || {
 			content: {
+				about: '',
+				competencies: [],
 				education: [],
 				experience: [],
-				personalInfo: {
-					email: '',
-					github: '',
-					linkedin: '',
-					location: '',
-					name: '',
-					phone: '',
-					website: '',
-				},
+				headline: '',
 				projects: [],
 				skills: {
-					certifications: [],
-					languages: [],
 					soft: [],
 					technical: [],
 				},
@@ -65,18 +50,22 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 			},
 			title: '',
 		},
-		mode: 'onChange', // Enable real-time validation for step advancement
+		mode: 'onChange',
 		resolver: zodResolver(createResumeSchema),
 	})
 
-	// Define wizard steps
+	// Define wizard steps - Reordered per requirements
+	// Step 1: Resume Info (title, headline, about, competencies)
+	// Step 2: Experience
+	// Step 3: Education
+	// Step 4: Projects
+	// Step 5: Skills
 	const wizardSteps: WizardStep[] = useMemo(
 		() => [
 			{
-				component: <PersonalInfoSection control={form.control} />,
-				id: 'personal',
-				label: 'Personal Info',
-				validationFields: ['content.personalInfo.name', 'content.personalInfo.email'],
+				component: <ResumeInfoSection control={form.control} />,
+				id: 'resume-info',
+				label: 'Resume Info',
 			},
 			{
 				component: <ExperienceSection control={form.control} />,
@@ -89,14 +78,14 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 				label: 'Education',
 			},
 			{
-				component: <SkillsSection control={form.control} />,
-				id: 'skills',
-				label: 'Skills',
-			},
-			{
 				component: <ProjectsSection control={form.control} />,
 				id: 'projects',
 				label: 'Projects',
+			},
+			{
+				component: <SkillsSection control={form.control} />,
+				id: 'skills',
+				label: 'Skills',
 			},
 		],
 		[form.control],
@@ -107,14 +96,9 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 		const errors = form.formState.errors
 		const title = form.getValues('title')
 
-		// Always require title
-		if (!title) return false
+		// Always require title (validated in Step 1 - Resume Info)
+		if (!title || title.trim() === '') return false
 		if (errors.title) return false
-
-		// For personal info step, check required fields
-		if (errors.content?.personalInfo?.name || errors.content?.personalInfo?.email) {
-			return false
-		}
 
 		// All other required validations are handled by the schema
 		return true
@@ -160,30 +144,6 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 	return (
 		<Form {...form}>
 			<div className="space-y-6">
-				{/* Resume Title */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Resume Information</CardTitle>
-						<CardDescription>Give your resume a descriptive title</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<FormField
-							control={form.control}
-							name="title"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Resume Title</FormLabel>
-									<FormControl>
-										<Input placeholder="e.g., Software Engineer Resume" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</CardContent>
-				</Card>
-
-				{/* Wizard Steps */}
 				<WizardWrapper
 					canAdvance={canAdvance}
 					isSubmitting={isSubmitting}
@@ -194,7 +154,6 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 					submitLabel={resumeId ? 'Save New Version' : 'Create Resume'}
 				/>
 
-				{/* Commit Message (only for updates) */}
 				{resumeId && (
 					<Card>
 						<CardHeader>

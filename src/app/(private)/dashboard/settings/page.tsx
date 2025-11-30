@@ -12,7 +12,7 @@ export default function Page() {
 	const description = String(metadata.description)
 
 	return (
-		<MainContent size="2xl">
+		<MainContent size="lg">
 			<PageHeader>
 				<PageTitle>{title}</PageTitle>
 				<PageDescription>{description}</PageDescription>

@@ -73,10 +73,12 @@ export function matchResumeToJob(
 function resumeToText(content: ResumeContent): string {
 	const parts: string[] = []
 
-	// Personal info
-	parts.push(content.personalInfo.name)
-	parts.push(content.personalInfo.email)
-	if (content.personalInfo.location) parts.push(content.personalInfo.location)
+	// Headline and About (new fields)
+	if (content.headline) parts.push(content.headline)
+	if (content.about) parts.push(content.about)
+
+	// Competencies (new field)
+	if (content.competencies) parts.push(...content.competencies)
 
 	// Summary
 	if (content.summary) parts.push(content.summary)
@@ -92,11 +94,9 @@ function resumeToText(content: ResumeContent): string {
 		parts.push(edu.school, edu.degree, edu.field || '')
 	}
 
-	// Skills
+	// Skills (only technical and soft now)
 	parts.push(...content.skills.technical)
 	parts.push(...content.skills.soft)
-	parts.push(...content.skills.languages)
-	parts.push(...content.skills.certifications)
 
 	// Projects
 	for (const project of content.projects) {

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,11 +14,29 @@ interface ProjectsSectionProps {
 	control: Control<any>
 }
 
+const defaultEmptyProject = {
+	description: '',
+	name: '',
+	technologies: [],
+	url: '',
+}
+
 export function ProjectsSection({ control }: ProjectsSectionProps) {
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'content.projects',
 	})
+
+	// Auto-add first empty project if array is empty
+	useEffect(() => {
+		if (fields.length === 0) {
+			append(defaultEmptyProject)
+		}
+	}, [fields.length, append])
+
+	const addProject = () => {
+		append(defaultEmptyProject)
+	}
 
 	return (
 		<div className="space-y-6">
@@ -28,12 +47,7 @@ export function ProjectsSection({ control }: ProjectsSectionProps) {
 						Showcase your personal or professional projects
 					</p>
 				</div>
-				<Button
-					onClick={() => append({ description: '', name: '', technologies: [], url: '' })}
-					size="sm"
-					type="button"
-					variant="outline"
-				>
+				<Button onClick={addProject} size="sm" type="button" variant="outline">
 					Add Project
 				</Button>
 			</div>

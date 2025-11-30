@@ -3,6 +3,18 @@ import { dataTableConfig } from '@shared/config/data-table'
 import { createParser } from 'nuqs/server'
 import { z } from 'zod'
 
+/**
+ * Parses a comma-separated string into an array of trimmed, non-empty strings.
+ * @param input - The comma-separated string to parse
+ * @returns An array of trimmed strings with empty values filtered out
+ */
+export function parseCommaSeparated(input: string): string[] {
+	return input
+		.split(',')
+		.map((item) => item.trim())
+		.filter((item) => item.length > 0)
+}
+
 const sortingItemSchema = z.object({
 	desc: z.boolean(),
 	id: z.string(),

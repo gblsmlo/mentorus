@@ -23,14 +23,14 @@ export default async function ResumesPage() {
 	const resumes = await getUserResumes(session.user.id)
 
 	return (
-		<MainContent size="2xl">
+		<MainContent size="lg">
 			<div className="flex items-center justify-between">
 				<PageHeader>
 					<PageTitle>My Resumes</PageTitle>
 					<PageDescription>Create and manage your resumes with version control</PageDescription>
 				</PageHeader>
 				<Button asChild>
-					<Link href="/resumes/new">Create Resume</Link>
+					<Link href="/dashboard/resumes/new">New Resume</Link>
 				</Button>
 			</div>
 

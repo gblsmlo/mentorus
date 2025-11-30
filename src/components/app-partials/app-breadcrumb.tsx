@@ -20,8 +20,8 @@ type BreadcrumbRoute = {
 	link: string | null
 }
 
-type AppBreadcrumbProps = {
-	routes: BreadcrumbRoute[]
+export type AppBreadcrumbProps = {
+	routes?: BreadcrumbRoute[]
 }
 
 function buildItemsFromSegments(pathname: string) {

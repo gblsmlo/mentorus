@@ -29,16 +29,7 @@ export async function createResume(userId: string, data: unknown) {
 			validated.content.education.length > 0
 				? validated.content.education
 				: masterProfile?.education || [],
-		personalInfo: masterProfile?.personalInfo || validated.content.personalInfo,
 		skills: {
-			certifications: [
-				...(masterProfile?.skills?.certifications || []),
-				...validated.content.skills.certifications,
-			],
-			languages: [
-				...(masterProfile?.skills?.languages || []),
-				...validated.content.skills.languages,
-			],
 			soft: [...(masterProfile?.skills?.soft || []), ...validated.content.skills.soft],
 			technical: [
 				...(masterProfile?.skills?.technical || []),

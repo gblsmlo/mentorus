@@ -1,11 +1,9 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Card, CardContent } from '@/components/ui/card'
+import { FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useState } from 'react'
+import { parseCommaSeparated } from '@/lib/parsers'
 import type { Control } from 'react-hook-form'
 
 interface SkillsSectionProps {
@@ -14,111 +12,70 @@ interface SkillsSectionProps {
 
 export function SkillsSection({ control }: SkillsSectionProps) {
 	return (
-		<div className="space-y-6">
-			<Card>
-				<CardHeader>
-					<CardTitle>Technical Skills</CardTitle>
-					<CardDescription>Programming languages, frameworks, tools, etc.</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<SkillInput control={control} name="content.skills.technical" />
-				</CardContent>
-			</Card>
+		<div className="space-y-8">
+			{/* Hard Skills (Technical) */}
+			<div className="space-y-4">
+				<div className="space-y-1">
+					<h3 className="font-semibold text-xl tracking-tight">Hard Skills</h3>
+					<p className="text-muted-foreground text-sm">
+						Programming languages, frameworks, tools, etc.
+					</p>
+				</div>
+				<Card>
+					<CardContent className="pt-6">
+						<FormField
+							control={control}
+							name="content.skills.technical"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Input
+											placeholder="e.g., React, TypeScript, Node.js"
+											value={field.value?.join(', ') || ''}
+											onChange={(e) => {
+												const parsed = parseCommaSeparated(e.target.value)
+												field.onChange(parsed)
+											}}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</CardContent>
+				</Card>
+			</div>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Soft Skills</CardTitle>
-					<CardDescription>Leadership, communication, teamwork, etc.</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<SkillInput control={control} name="content.skills.soft" />
-				</CardContent>
-			</Card>
-
-			<Card>
-				<CardHeader>
-					<CardTitle>Languages</CardTitle>
-					<CardDescription>Spoken languages and proficiency levels</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<SkillInput control={control} name="content.skills.languages" />
-				</CardContent>
-			</Card>
-
-			<Card>
-				<CardHeader>
-					<CardTitle>Certifications</CardTitle>
-					<CardDescription>Professional certifications and licenses</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<SkillInput control={control} name="content.skills.certifications" />
-				</CardContent>
-			</Card>
+			{/* Soft Skills */}
+			<div className="space-y-4">
+				<div className="space-y-1">
+					<h3 className="font-semibold text-xl tracking-tight">Soft Skills</h3>
+					<p className="text-muted-foreground text-sm">Leadership, communication, teamwork, etc.</p>
+				</div>
+				<Card>
+					<CardContent className="pt-6">
+						<FormField
+							control={control}
+							name="content.skills.soft"
+							render={({ field }) => (
+								<FormItem>
+									<FormControl>
+										<Input
+											placeholder="e.g., Leadership, Communication, Problem-solving"
+											value={field.value?.join(', ') || ''}
+											onChange={(e) => {
+												const parsed = parseCommaSeparated(e.target.value)
+												field.onChange(parsed)
+											}}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</CardContent>
+				</Card>
+			</div>
 		</div>
-	)
-}
-
-function SkillInput({ control, name }: { control: Control<any>; name: string }) {
-	const [inputValue, setInputValue] = useState('')
-
-	return (
-		<FormField
-			control={control}
-			name={name}
-			render={({ field }) => {
-				const skills = field.value || []
-
-				const addSkill = () => {
-					if (inputValue.trim() && !skills.includes(inputValue.trim())) {
-						field.onChange([...skills, inputValue.trim()])
-						setInputValue('')
-					}
-				}
-
-				const removeSkill = (skillToRemove: string) => {
-					field.onChange(skills.filter((s: string) => s !== skillToRemove))
-				}
-
-				return (
-					<FormItem>
-						<FormControl>
-							<div className="space-y-3">
-								<div className="flex gap-2">
-									<Input
-										onChange={(e) => setInputValue(e.target.value)}
-										onKeyDown={(e) => {
-											if (e.key === 'Enter') {
-												e.preventDefault()
-												addSkill()
-											}
-										}}
-										placeholder="Type a skill and press Enter or click Add"
-										value={inputValue}
-									/>
-									<Button onClick={addSkill} type="button" variant="outline">
-										Add
-									</Button>
-								</div>
-								<div className="flex flex-wrap gap-2">
-									{skills.map((skill: string) => (
-										<Badge key={skill} variant="secondary">
-											{skill}
-											<button
-												className="ml-2 hover:text-destructive"
-												onClick={() => removeSkill(skill)}
-												type="button"
-											>
-												×
-											</button>
-										</Badge>
-									))}
-								</div>
-							</div>
-						</FormControl>
-						<FormMessage />
-					</FormItem>
-				)
-			}}
-		/>
 	)
 }

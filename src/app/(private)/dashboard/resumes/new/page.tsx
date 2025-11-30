@@ -18,10 +18,10 @@ export default async function NewResumePage() {
 	}
 
 	return (
-		<MainContent size="xl">
+		<MainContent size="lg">
 			<PageHeader>
-				<PageTitle>Create New Resume</PageTitle>
-				<PageDescription>Fill in your information to create a resume.</PageDescription>
+				<PageTitle>Resume Information</PageTitle>
+				<PageDescription>Fill in your information to create a resume</PageDescription>
 			</PageHeader>
 
 			<ResumeForm userId={session.user.id} />

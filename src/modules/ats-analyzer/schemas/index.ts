@@ -1,7 +1,13 @@
 import { z } from 'zod'
 
 // Resume Content Schema - Flexible structure for resume data
+// Note: personalInfo is now managed in userProfile table
 export const resumeContentSchema = z.object({
+	// NEW FIELDS for Step 1 (Resume Info)
+	about: z.string().optional(),
+	competencies: z.array(z.string()).optional().default([]),
+
+	// EXISTING FIELDS
 	education: z
 		.array(
 			z.object({
@@ -26,31 +32,23 @@ export const resumeContentSchema = z.object({
 			}),
 		)
 		.default([]),
-	personalInfo: z.object({
-		email: z.string().email('Invalid email'),
-		github: z.string().url().optional().or(z.literal('')),
-		linkedin: z.string().url().optional().or(z.literal('')),
-		location: z.string().optional(),
-		name: z.string().min(1, 'Name is required'),
-		phone: z.string().optional(),
-		website: z.string().url().optional().or(z.literal('')),
-	}),
+	headline: z.string().optional(),
 	projects: z
 		.array(
 			z.object({
 				description: z.string().optional(),
 				name: z.string().min(1, 'Project name is required'),
 				technologies: z.array(z.string()).default([]),
-				url: z.string().url().optional().or(z.literal('')),
+				url: z.string().optional(),
 			}),
 		)
 		.default([]),
-	skills: z.object({
-		certifications: z.array(z.string()).default([]),
-		languages: z.array(z.string()).default([]),
-		soft: z.array(z.string()).default([]),
-		technical: z.array(z.string()).default([]),
-	}),
+	skills: z
+		.object({
+			soft: z.array(z.string()).default([]),
+			technical: z.array(z.string()).default([]),
+		})
+		.default({ soft: [], technical: [] }),
 	summary: z.string().optional(),
 })
 

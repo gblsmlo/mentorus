@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
@@ -10,11 +11,30 @@ interface EducationSectionProps {
 	control: Control<any>
 }
 
+const defaultEmptyEducation = {
+	degree: '',
+	field: '',
+	gpa: '',
+	graduationDate: '',
+	school: '',
+}
+
 export function EducationSection({ control }: EducationSectionProps) {
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'content.education',
 	})
+
+	// Auto-add first empty education if array is empty
+	useEffect(() => {
+		if (fields.length === 0) {
+			append(defaultEmptyEducation)
+		}
+	}, [fields.length, append])
+
+	const addEducation = () => {
+		append(defaultEmptyEducation)
+	}
 
 	return (
 		<div className="space-y-6">
@@ -23,12 +43,7 @@ export function EducationSection({ control }: EducationSectionProps) {
 					<h3 className="font-semibold text-lg">Education</h3>
 					<p className="text-muted-foreground text-sm">Add your educational background</p>
 				</div>
-				<Button
-					onClick={() => append({ degree: '', field: '', gpa: '', graduationDate: '', school: '' })}
-					size="sm"
-					type="button"
-					variant="outline"
-				>
+				<Button onClick={addEducation} size="sm" type="button" variant="outline">
 					Add Education
 				</Button>
 			</div>

@@ -50,16 +50,12 @@ export function ResumeList({ resumes, userId }: ResumeListProps) {
 			<Card>
 				<CardContent className="flex flex-col items-center justify-center py-12">
 					<div className="space-y-4 text-center">
-						<div className="text-4xl">📄</div>
 						<div>
 							<h3 className="font-semibold text-lg">No resumes yet</h3>
 							<p className="text-muted-foreground text-sm">
 								Create your first resume to get started with ATS analysis
 							</p>
 						</div>
-						<Button asChild>
-							<Link href="/resumes/new">Create Your First Resume</Link>
-						</Button>
 					</div>
 				</CardContent>
 			</Card>

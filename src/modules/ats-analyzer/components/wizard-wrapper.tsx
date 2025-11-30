@@ -1,10 +1,8 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Stepper } from '@/components/ui/stepper'
 import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import type { Step, WizardStep } from '../types/wizard-types'
 
@@ -31,7 +29,6 @@ export function WizardWrapper({
 }: WizardWrapperProps) {
 	const [currentStep, setCurrentStep] = useState(initialStep)
 	const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
-	const [direction, setDirection] = useState<'forward' | 'backward'>('forward')
 
 	const isFirstStep = currentStep === 0
 	const isLastStep = currentStep === steps.length - 1
@@ -77,21 +74,18 @@ export function WizardWrapper({
 		if (!canAdvance || isLastStep) return
 
 		setCompletedSteps((prev) => new Set(prev).add(currentStep))
-		setDirection('forward')
 		setCurrentStep((prev) => prev + 1)
 	}
 
 	const handlePrevious = () => {
 		if (isFirstStep) return
 
-		setDirection('backward')
 		setCurrentStep((prev) => prev - 1)
 	}
 
 	const handleStepClick = (stepIndex: number) => {
 		// Only allow clicking on completed steps (backward navigation)
 		if (completedSteps.has(stepIndex)) {
-			setDirection(stepIndex < currentStep ? 'backward' : 'forward')
 			setCurrentStep(stepIndex)
 		}
 	}
@@ -109,52 +103,12 @@ export function WizardWrapper({
 		onComplete()
 	}
 
-	// Animation variants for content transitions
-	const variants = {
-		center: {
-			opacity: 1,
-			x: 0,
-		},
-		enter: (direction: 'forward' | 'backward') => ({
-			opacity: 0,
-			x: direction === 'forward' ? 300 : -300,
-		}),
-		exit: (direction: 'forward' | 'backward') => ({
-			opacity: 0,
-			x: direction === 'forward' ? -300 : 300,
-		}),
-	}
-
 	return (
 		<div className="space-y-6">
-			{/* Stepper Header */}
-			<Card>
-				<CardContent className="pt-6">
-					<Stepper currentStep={currentStep} onStepClick={handleStepClick} steps={stepStates} />
-				</CardContent>
-			</Card>
+			<Stepper currentStep={currentStep} onStepClick={handleStepClick} steps={stepStates} />
 
-			{/* Step Content with Animation */}
-			<div className="relative overflow-hidden">
-				<AnimatePresence custom={direction} mode="wait">
-					<motion.div
-						animate="center"
-						custom={direction}
-						exit="exit"
-						initial="enter"
-						key={currentStep}
-						transition={{
-							opacity: { duration: 0.2 },
-							x: { damping: 30, stiffness: 300, type: 'spring' },
-						}}
-						variants={variants}
-					>
-						{steps[currentStep].component}
-					</motion.div>
-				</AnimatePresence>
-			</div>
+			<div className="relative overflow-hidden">{steps[currentStep].component}</div>
 
-			{/* Navigation Buttons */}
 			<div className="flex justify-between gap-4">
 				<Button
 					disabled={isSubmitting}
