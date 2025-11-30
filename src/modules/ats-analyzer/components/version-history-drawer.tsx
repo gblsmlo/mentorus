@@ -68,8 +68,8 @@ export function VersionHistoryDrawer({
 	const sortedVersions = [...versions].sort((a, b) => b.versionNumber - a.versionNumber)
 
 	return (
-		<Sheet open={open} onOpenChange={onOpenChange}>
-			<SheetContent side="right" className="w-[400px] sm:max-w-[400px]">
+		<Sheet onOpenChange={onOpenChange} open={open}>
+			<SheetContent className="w-[400px] sm:max-w-[400px]" side="right">
 				<SheetHeader>
 					<SheetTitle className="flex items-center gap-2">
 						<History className="h-5 w-5" />
@@ -90,11 +90,9 @@ export function VersionHistoryDrawer({
 				<ScrollArea className="h-[calc(100vh-180px)] pr-4">
 					{sortedVersions.length === 0 ? (
 						<div className="flex flex-col items-center justify-center py-12 text-center">
-							<History className="h-12 w-12 text-muted-foreground/50 mb-4" />
-							<p className="text-muted-foreground text-sm">
-								No versions saved yet.
-							</p>
-							<p className="text-muted-foreground text-xs mt-1">
+							<History className="mb-4 h-12 w-12 text-muted-foreground/50" />
+							<p className="text-muted-foreground text-sm">No versions saved yet.</p>
+							<p className="mt-1 text-muted-foreground text-xs">
 								Save a version to start tracking your changes.
 							</p>
 						</div>
@@ -106,22 +104,20 @@ export function VersionHistoryDrawer({
 
 								return (
 									<div
-										key={version.id}
 										className={cn(
 											'rounded-lg border p-4 transition-colors',
 											isCurrent && 'border-primary/50 bg-primary/5',
-											isSelected && isRestoring && 'opacity-50'
+											isSelected && isRestoring && 'opacity-50',
 										)}
+										key={version.id}
 									>
 										{/* Version header */}
 										<div className="flex items-start justify-between">
 											<div className="space-y-1">
 												<div className="flex items-center gap-2">
-													<span className="font-semibold">
-														Version {version.versionNumber}
-													</span>
+													<span className="font-semibold">Version {version.versionNumber}</span>
 													{isCurrent && (
-														<Badge variant="default" className="text-xs">
+														<Badge className="text-xs" variant="default">
 															Current
 														</Badge>
 													)}
@@ -146,9 +142,7 @@ export function VersionHistoryDrawer({
 										{/* Commit message */}
 										{version.commitMessage && (
 											<div className="mt-3 rounded-md bg-muted/50 p-2">
-												<p className="text-sm text-muted-foreground">
-													{version.commitMessage}
-												</p>
+												<p className="text-muted-foreground text-sm">{version.commitMessage}</p>
 											</div>
 										)}
 
@@ -156,15 +150,17 @@ export function VersionHistoryDrawer({
 										{!isCurrent && (
 											<div className="mt-3 flex justify-end">
 												<Button
-													variant="outline"
-													size="sm"
-													onClick={() => handleRestore(version.id)}
 													disabled={isRestoring}
+													onClick={() => handleRestore(version.id)}
+													size="sm"
+													variant="outline"
 												>
-													<RotateCcw className={cn(
-														'mr-2 h-3 w-3',
-														isSelected && isRestoring && 'animate-spin'
-													)} />
+													<RotateCcw
+														className={cn(
+															'mr-2 h-3 w-3',
+															isSelected && isRestoring && 'animate-spin',
+														)}
+													/>
 													{isSelected && isRestoring ? 'Restoring...' : 'Restore'}
 												</Button>
 											</div>

@@ -167,7 +167,7 @@ export function AnalysisDashboard({ userId, resumeId, currentVersionId }: Analys
 								</CardHeader>
 								<CardContent>
 									<div className="flex flex-wrap gap-2">
-										{result.matchedKeywords.map((item: any, i: number) => (
+										{result.matchedKeywords.map((item, i) => (
 											<Badge key={i} variant="default">
 												{item.keyword}
 												<span className="ml-1 text-xs opacity-70">{item.category}</span>
@@ -187,7 +187,7 @@ export function AnalysisDashboard({ userId, resumeId, currentVersionId }: Analys
 									</CardDescription>
 								</CardHeader>
 								<CardContent className="space-y-4">
-									{result.missingKeywords.map((item: any, i: number) => (
+									{result.missingKeywords.map((item, i) => (
 										<div className="border-destructive border-l-2 py-2 pl-4" key={i}>
 											<div className="mb-1 flex items-center gap-2">
 												<Badge variant="destructive">{item.keyword}</Badge>

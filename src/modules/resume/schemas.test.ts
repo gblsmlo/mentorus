@@ -66,7 +66,8 @@ describe('Resume Schemas Validation Tests', () => {
 				expect(result.data.education).toEqual([])
 				expect(result.data.experience).toEqual([])
 				expect(result.data.projects).toEqual([])
-				expect(result.data.skills).toEqual({ soft: [], technical: [] })
+				// Updated: new structure uses hard/soft/tools instead of technical/soft
+				expect(result.data.skills).toEqual({ hard: [], soft: [], tools: [] })
 			}
 		})
 	})

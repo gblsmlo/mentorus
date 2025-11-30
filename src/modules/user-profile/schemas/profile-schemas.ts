@@ -1,28 +1,29 @@
+import { VALIDATION_MESSAGES } from '@/shared/constants/validation-messages'
 import { z } from 'zod'
 
 // Personal Info Schemas
 export const profileBasicInfoSchema = z.object({
-	email: z.string().email('Invalid email address'),
+	email: z.string().email(VALIDATION_MESSAGES.EMAIL_INVALID),
 	location: z.string().optional(),
-	name: z.string().min(1, 'Name is required'),
+	name: z.string().min(1, VALIDATION_MESSAGES.NAME_REQUIRED),
 	phone: z.string().optional(),
 })
 
 export const profileSocialInfoSchema = z.object({
-	github: z.string().url('Invalid GitHub URL').optional().or(z.literal('')),
-	linkedin: z.string().url('Invalid LinkedIn URL').optional().or(z.literal('')),
-	website: z.string().url('Invalid website URL').optional().or(z.literal('')),
+	github: z.string().url(VALIDATION_MESSAGES.URL_INVALID).optional().or(z.literal('')),
+	linkedin: z.string().url(VALIDATION_MESSAGES.URL_INVALID).optional().or(z.literal('')),
+	website: z.string().url(VALIDATION_MESSAGES.URL_INVALID).optional().or(z.literal('')),
 })
 
 export const personalInfoSchema = profileBasicInfoSchema.merge(profileSocialInfoSchema)
 
 // Education Schema (reused from resume)
 export const educationItemSchema = z.object({
-	degree: z.string().min(1, 'Degree is required'),
+	degree: z.string().min(1, VALIDATION_MESSAGES.DEGREE_TYPE_REQUIRED),
 	field: z.string().optional(),
 	gpa: z.string().optional(),
 	graduationDate: z.string().optional(),
-	school: z.string().min(1, 'School is required'),
+	school: z.string().min(1, VALIDATION_MESSAGES.INSTITUTION_REQUIRED),
 })
 
 export const educationSchema = z.array(educationItemSchema).default([])

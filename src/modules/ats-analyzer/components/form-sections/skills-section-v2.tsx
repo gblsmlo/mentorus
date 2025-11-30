@@ -45,8 +45,8 @@ function HardSkillsInput({ control }: { control: Control<ResumeContent> }) {
 	const handleAddSkill = () => {
 		if (newSkillName.trim()) {
 			const newSkill: ResumeHardSkill = {
-				name: newSkillName.trim(),
 				level: newSkillLevel || undefined,
+				name: newSkillName.trim(),
 			}
 			append(newSkill)
 			setNewSkillName('')
@@ -66,20 +66,20 @@ function HardSkillsInput({ control }: { control: Control<ResumeContent> }) {
 			<CardHeader>
 				<CardTitle>Hard Skills</CardTitle>
 				<CardDescription>
-					Technical skills like programming languages, frameworks, and methodologies.
-					These have the highest weight (60%) in ATS matching.
+					Technical skills like programming languages, frameworks, and methodologies. These have the
+					highest weight (60%) in ATS matching.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="flex gap-2">
 					<Input
-						placeholder="e.g., React, TypeScript, AWS"
-						value={newSkillName}
+						className="flex-1"
 						onChange={(e) => setNewSkillName(e.target.value)}
 						onKeyDown={handleKeyDown}
-						className="flex-1"
+						placeholder="e.g., React, TypeScript, AWS"
+						value={newSkillName}
 					/>
-					<Select value={newSkillLevel} onValueChange={setNewSkillLevel}>
+					<Select onValueChange={setNewSkillLevel} value={newSkillLevel}>
 						<SelectTrigger className="w-[140px]">
 							<SelectValue placeholder="Level" />
 						</SelectTrigger>
@@ -91,7 +91,7 @@ function HardSkillsInput({ control }: { control: Control<ResumeContent> }) {
 							))}
 						</SelectContent>
 					</Select>
-					<Button type="button" onClick={handleAddSkill} size="icon">
+					<Button onClick={handleAddSkill} size="icon" type="button">
 						<IconPlus className="h-4 w-4" />
 					</Button>
 				</div>
@@ -105,20 +105,18 @@ function HardSkillsInput({ control }: { control: Control<ResumeContent> }) {
 							})
 							return (
 								<Badge
+									className="flex items-center gap-1 px-3 py-1"
 									key={field.id}
 									variant="secondary"
-									className="flex items-center gap-1 px-3 py-1"
 								>
 									<span>{skill?.name}</span>
 									{skill?.level && (
-										<span className="text-muted-foreground text-xs">
-											({skill.level})
-										</span>
+										<span className="text-muted-foreground text-xs">({skill.level})</span>
 									)}
 									<button
-										type="button"
-										onClick={() => remove(index)}
 										className="ml-1 hover:text-destructive"
+										onClick={() => remove(index)}
+										type="button"
 									>
 										<IconX className="h-3 w-3" />
 									</button>
@@ -129,7 +127,7 @@ function HardSkillsInput({ control }: { control: Control<ResumeContent> }) {
 				)}
 
 				{fields.length === 0 && (
-					<p className="text-center text-muted-foreground text-sm py-2">
+					<p className="py-2 text-center text-muted-foreground text-sm">
 						No hard skills added yet. Type a skill and press Enter or click + to add.
 					</p>
 				)}
@@ -155,8 +153,8 @@ function SoftSkillsInput({ control }: { control: Control<ResumeContent> }) {
 			<CardHeader>
 				<CardTitle>Soft Skills</CardTitle>
 				<CardDescription>
-					Interpersonal and behavioral skills like leadership, communication, and teamwork.
-					These have medium weight (30%) in ATS matching.
+					Interpersonal and behavioral skills like leadership, communication, and teamwork. These
+					have medium weight (30%) in ATS matching.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -167,9 +165,9 @@ function SoftSkillsInput({ control }: { control: Control<ResumeContent> }) {
 						<FormItem>
 							<FormControl>
 								<TagInput
-									value={field.value || []}
 									onChange={field.onChange}
 									placeholder="e.g., Leadership, Communication, Problem-solving"
+									value={field.value || []}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -187,8 +185,8 @@ function ToolsInput({ control }: { control: Control<ResumeContent> }) {
 			<CardHeader>
 				<CardTitle>Tools & Technologies</CardTitle>
 				<CardDescription>
-					Software tools, platforms, and technologies you're proficient with.
-					These are included in hard skills matching.
+					Software tools, platforms, and technologies you're proficient with. These are included in
+					hard skills matching.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -199,9 +197,9 @@ function ToolsInput({ control }: { control: Control<ResumeContent> }) {
 						<FormItem>
 							<FormControl>
 								<TagInput
-									value={field.value || []}
 									onChange={field.onChange}
 									placeholder="e.g., Git, Docker, Jira, Figma"
+									value={field.value || []}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -248,13 +246,13 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
 		<div className="space-y-3">
 			<div className="flex gap-2">
 				<Input
-					placeholder={placeholder}
-					value={inputValue}
+					className="flex-1"
 					onChange={(e) => setInputValue(e.target.value)}
 					onKeyDown={handleKeyDown}
-					className="flex-1"
+					placeholder={placeholder}
+					value={inputValue}
 				/>
-				<Button type="button" onClick={handleAddTag} size="icon">
+				<Button onClick={handleAddTag} size="icon" type="button">
 					<IconPlus className="h-4 w-4" />
 				</Button>
 			</div>
@@ -262,16 +260,12 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
 			{value.length > 0 && (
 				<div className="flex flex-wrap gap-2">
 					{value.map((tag) => (
-						<Badge
-							key={tag}
-							variant="secondary"
-							className="flex items-center gap-1 px-3 py-1"
-						>
+						<Badge className="flex items-center gap-1 px-3 py-1" key={tag} variant="secondary">
 							<span>{tag}</span>
 							<button
-								type="button"
-								onClick={() => handleRemoveTag(tag)}
 								className="ml-1 hover:text-destructive"
+								onClick={() => handleRemoveTag(tag)}
+								type="button"
 							>
 								<IconX className="h-3 w-3" />
 							</button>
@@ -281,7 +275,7 @@ function TagInput({ value, onChange, placeholder }: TagInputProps) {
 			)}
 
 			{value.length === 0 && (
-				<p className="text-center text-muted-foreground text-sm py-2">
+				<p className="py-2 text-center text-muted-foreground text-sm">
 					No items added yet. Type and press Enter or click + to add.
 				</p>
 			)}

@@ -8,51 +8,51 @@
  * back SHALL produce an object that is deeply equal to the original.
  */
 
-import { describe, it, expect } from 'vitest';
-import * as fc from 'fast-check';
-import { resumeContentArbitrary } from '../arbitraries/resume-content.arbitrary';
-import { resumeContentSchema } from '../../schemas/resume-content.schema';
+import * as fc from 'fast-check'
+import { describe, expect, it } from 'vitest'
+import { resumeContentSchema } from '../../schemas/resume-content.schema'
+import { resumeContentArbitrary } from '../arbitraries/resume-content.arbitrary'
 
 describe('ResumeContent Serialization Properties', () => {
-  it('Property 8: Round-trip serialization preserves data integrity', () => {
-    fc.assert(
-      fc.property(resumeContentArbitrary, (resumeContent) => {
-        // Serialize to JSON string
-        const serialized = JSON.stringify(resumeContent);
+	it('Property 8: Round-trip serialization preserves data integrity', () => {
+		fc.assert(
+			fc.property(resumeContentArbitrary, (resumeContent) => {
+				// Serialize to JSON string
+				const serialized = JSON.stringify(resumeContent)
 
-        // Deserialize back to object
-        const deserialized = JSON.parse(serialized);
+				// Deserialize back to object
+				const deserialized = JSON.parse(serialized)
 
-        // Validate the deserialized object against the schema
-        const parseResult = resumeContentSchema.safeParse(deserialized);
+				// Validate the deserialized object against the schema
+				const parseResult = resumeContentSchema.safeParse(deserialized)
 
-        // The deserialized object should be valid
-        expect(parseResult.success).toBe(true);
+				// The deserialized object should be valid
+				expect(parseResult.success).toBe(true)
 
-        // The deserialized object should be deeply equal to the original
-        expect(deserialized).toEqual(resumeContent);
-      }),
-      { numRuns: 100 }
-    );
-  });
+				// The deserialized object should be deeply equal to the original
+				expect(deserialized).toEqual(resumeContent)
+			}),
+			{ numRuns: 100 },
+		)
+	})
 
-  it('Property 8: Validated content round-trips correctly', () => {
-    fc.assert(
-      fc.property(resumeContentArbitrary, (resumeContent) => {
-        // First validate the input
-        const validatedInput = resumeContentSchema.parse(resumeContent);
+	it('Property 8: Validated content round-trips correctly', () => {
+		fc.assert(
+			fc.property(resumeContentArbitrary, (resumeContent) => {
+				// First validate the input
+				const validatedInput = resumeContentSchema.parse(resumeContent)
 
-        // Serialize validated content
-        const serialized = JSON.stringify(validatedInput);
+				// Serialize validated content
+				const serialized = JSON.stringify(validatedInput)
 
-        // Deserialize and validate again
-        const deserialized = JSON.parse(serialized);
-        const validatedOutput = resumeContentSchema.parse(deserialized);
+				// Deserialize and validate again
+				const deserialized = JSON.parse(serialized)
+				const validatedOutput = resumeContentSchema.parse(deserialized)
 
-        // Both validated objects should be equal
-        expect(validatedOutput).toEqual(validatedInput);
-      }),
-      { numRuns: 100 }
-    );
-  });
-});
+				// Both validated objects should be equal
+				expect(validatedOutput).toEqual(validatedInput)
+			}),
+			{ numRuns: 100 },
+		)
+	})
+})

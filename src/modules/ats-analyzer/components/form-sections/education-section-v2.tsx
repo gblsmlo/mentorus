@@ -38,12 +38,12 @@ const STUDY_TYPES = [
 ] as const
 
 const createEmptyEducation = (): ResumeEducation => ({
+	area: '',
+	endDate: undefined,
 	id: crypto.randomUUID(),
 	institution: '',
-	area: '',
-	studyType: '',
 	startDate: '',
-	endDate: undefined,
+	studyType: '',
 })
 
 export function EducationSectionV2({ control }: EducationSectionV2Props) {
@@ -90,23 +90,23 @@ export function EducationSectionV2({ control }: EducationSectionV2Props) {
 
 			{fields.length > 0 && (
 				<Sortable
-					value={fields}
-					onMove={({ activeIndex, overIndex }) => handleMove(activeIndex, overIndex)}
 					getItemValue={(item) => item.id}
+					onMove={({ activeIndex, overIndex }) => handleMove(activeIndex, overIndex)}
 					orientation="vertical"
+					value={fields}
 				>
 					<SortableContent className="space-y-4">
 						{fields.map((field, index) => (
-							<SortableItem key={field.id} value={field.id} asChild>
+							<SortableItem asChild key={field.id} value={field.id}>
 								<Card>
 									<CardHeader>
 										<div className="flex items-center gap-2">
 											<SortableItemHandle asChild>
 												<Button
-													variant="ghost"
-													size="icon"
 													className="cursor-grab active:cursor-grabbing"
+													size="icon"
 													type="button"
+													variant="ghost"
 												>
 													<IconGripVertical className="h-4 w-4 text-muted-foreground" />
 												</Button>
@@ -164,10 +164,7 @@ export function EducationSectionV2({ control }: EducationSectionV2Props) {
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Degree Type *</FormLabel>
-														<Select
-															onValueChange={field.onChange}
-															value={field.value}
-														>
+														<Select onValueChange={field.onChange} value={field.value}>
 															<FormControl>
 																<SelectTrigger>
 																	<SelectValue placeholder="Select degree type" />
@@ -207,11 +204,7 @@ export function EducationSectionV2({ control }: EducationSectionV2Props) {
 													<FormItem>
 														<FormLabel>End Date</FormLabel>
 														<FormControl>
-															<Input
-																placeholder="2020-05"
-																{...field}
-																value={field.value ?? ''}
-															/>
+															<Input placeholder="2020-05" {...field} value={field.value ?? ''} />
 														</FormControl>
 														<FormMessage />
 													</FormItem>

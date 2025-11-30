@@ -6,6 +6,14 @@ export default defineConfig({
 		globals: true,
 		environment: 'node',
 		include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+		env: {
+			BETTER_AUTH_SECRET: 'test-secret-key-for-testing-only',
+			BETTER_AUTH_URL: 'http://localhost:3000',
+			DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
+			GOOGLE_CLIENT_ID: 'test-google-client-id',
+			GOOGLE_CLIENT_SECRET: 'test-google-client-secret',
+			NEXT_PUBLIC_URL: 'http://localhost:3000',
+		},
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],

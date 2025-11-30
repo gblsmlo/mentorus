@@ -28,42 +28,42 @@ interface ResumeFormProps {
 
 const defaultResumeContent: ResumeContent = {
 	basics: {
-		name: '',
 		email: '',
-		phone: '',
 		label: '',
 		location: {
 			city: '',
-			region: '',
 			countryCode: '',
+			region: '',
 		},
+		name: '',
+		phone: '',
 		profiles: [],
 	},
-	summary: '',
-	work: [],
 	education: [],
+	languages: [],
+	meta: {
+		completionScore: 0,
+		template: 'default',
+	},
 	skills: {
 		hard: [],
 		soft: [],
 		tools: [],
 	},
-	languages: [],
-	meta: {
-		template: 'default',
-		completionScore: 0,
-	},
+	summary: '',
+	work: [],
 }
 
 export function ResumeForm({ resumeId, userId, initialData, onSave }: ResumeFormProps) {
 	const [isSaving, setIsSaving] = useState(false)
 
 	const form = useForm<ResumeContent>({
-		resolver: zodResolver(resumeContentSchema),
 		defaultValues: {
 			...defaultResumeContent,
 			...initialData?.content,
 		},
 		mode: 'onChange',
+		resolver: zodResolver(resumeContentSchema),
 	})
 
 	const {
@@ -79,8 +79,8 @@ export function ResumeForm({ resumeId, userId, initialData, onSave }: ResumeForm
 		setIsSaving(true)
 		try {
 			await onSave({
-				title: initialData?.title || 'Untitled Resume',
 				content: data,
+				title: initialData?.title || 'Untitled Resume',
 			})
 		} finally {
 			setIsSaving(false)
@@ -89,15 +89,15 @@ export function ResumeForm({ resumeId, userId, initialData, onSave }: ResumeForm
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+			<form className="space-y-8" onSubmit={form.handleSubmit(handleSubmit)}>
 				{/* Global validation error summary */}
 				{hasErrors && (
 					<Card className="border-destructive bg-destructive/5">
 						<CardContent className="py-4">
-							<p className="text-destructive text-sm font-medium">
+							<p className="font-medium text-destructive text-sm">
 								Please fix the validation errors below before saving.
 							</p>
-							<ul className="mt-2 text-destructive text-sm list-disc list-inside">
+							<ul className="mt-2 list-inside list-disc text-destructive text-sm">
 								{Object.entries(errors).map(([key, error]) => {
 									if (typeof error === 'object' && 'message' in error) {
 										return (
@@ -121,8 +121,8 @@ export function ResumeForm({ resumeId, userId, initialData, onSave }: ResumeForm
 					<CardHeader>
 						<CardTitle>Professional Summary</CardTitle>
 						<CardDescription>
-							A brief overview of your professional background and career goals.
-							This is often the first thing recruiters read.
+							A brief overview of your professional background and career goals. This is often the
+							first thing recruiters read.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -158,14 +158,12 @@ export function ResumeForm({ resumeId, userId, initialData, onSave }: ResumeForm
 				<LanguagesSection control={form.control} />
 
 				{/* Save Button */}
-				<div className="flex justify-end gap-4 sticky bottom-4 bg-background/80 backdrop-blur-sm p-4 rounded-lg border">
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
+				<div className="sticky bottom-4 flex justify-end gap-4 rounded-lg border bg-background/80 p-4 backdrop-blur-sm">
+					<div className="flex items-center gap-2 text-muted-foreground text-sm">
 						{isDirty && <span className="text-amber-500">• Unsaved changes</span>}
-						{!isValid && hasErrors && (
-							<span className="text-destructive">• Validation errors</span>
-						)}
+						{!isValid && hasErrors && <span className="text-destructive">• Validation errors</span>}
 					</div>
-					<Button type="submit" disabled={isSaving || !isDirty}>
+					<Button disabled={isSaving || !isDirty} type="submit">
 						<IconDeviceFloppy className="mr-2 h-4 w-4" />
 						{isSaving ? 'Saving...' : 'Save Resume'}
 					</Button>

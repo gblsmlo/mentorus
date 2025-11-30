@@ -13,7 +13,11 @@ interface BasicsSectionProps {
 }
 
 export function BasicsSection({ control }: BasicsSectionProps) {
-	const { fields: profileFields, append: appendProfile, remove: removeProfile } = useFieldArray({
+	const {
+		fields: profileFields,
+		append: appendProfile,
+		remove: removeProfile,
+	} = useFieldArray({
 		control,
 		name: 'basics.profiles',
 	})
@@ -78,7 +82,11 @@ export function BasicsSection({ control }: BasicsSectionProps) {
 								<FormItem>
 									<FormLabel>Professional Headline</FormLabel>
 									<FormControl>
-										<Input placeholder="Senior Software Engineer" {...field} value={field.value ?? ''} />
+										<Input
+											placeholder="Senior Software Engineer"
+											{...field}
+											value={field.value ?? ''}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -130,7 +138,7 @@ export function BasicsSection({ control }: BasicsSectionProps) {
 								<FormItem>
 									<FormLabel>Country Code *</FormLabel>
 									<FormControl>
-										<Input placeholder="US" maxLength={2} {...field} />
+										<Input maxLength={2} placeholder="US" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -160,13 +168,13 @@ export function BasicsSection({ control }: BasicsSectionProps) {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					{profileFields.length === 0 && (
-						<p className="text-center text-muted-foreground text-sm py-4">
+						<p className="py-4 text-center text-muted-foreground text-sm">
 							No profiles added yet. Click "Add Profile" to add your online presence.
 						</p>
 					)}
 					{profileFields.map((field, index) => (
-						<div key={field.id} className="flex gap-4 items-start">
-							<div className="grid grid-cols-1 gap-4 md:grid-cols-2 flex-1">
+						<div className="flex items-start gap-4" key={field.id}>
+							<div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
 								<FormField
 									control={control}
 									name={`basics.profiles.${index}.network`}

@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
 	Sortable,
 	SortableContent,
@@ -13,6 +12,7 @@ import {
 	SortableItemHandle,
 	SortableOverlay,
 } from '@/components/ui/sortable'
+import { Textarea } from '@/components/ui/textarea'
 import { IconGripVertical, IconPlus, IconTrash } from '@tabler/icons-react'
 import { type Control, useFieldArray, useWatch } from 'react-hook-form'
 import type { ResumeContent, ResumeWorkExperience } from '../../types/resume-content'
@@ -22,12 +22,12 @@ interface WorkExperienceSectionProps {
 }
 
 const createEmptyWorkExperience = (): ResumeWorkExperience => ({
-	id: crypto.randomUUID(),
 	company: '',
+	endDate: '',
+	id: crypto.randomUUID(),
+	isCurrent: false,
 	position: '',
 	startDate: '',
-	endDate: '',
-	isCurrent: false,
 	summary: '',
 })
 
@@ -75,23 +75,23 @@ export function WorkExperienceSection({ control }: WorkExperienceSectionProps) {
 
 			{fields.length > 0 && (
 				<Sortable
-					value={fields}
-					onMove={({ activeIndex, overIndex }) => handleMove(activeIndex, overIndex)}
 					getItemValue={(item) => item.id}
+					onMove={({ activeIndex, overIndex }) => handleMove(activeIndex, overIndex)}
 					orientation="vertical"
+					value={fields}
 				>
 					<SortableContent className="space-y-4">
 						{fields.map((field, index) => (
-							<SortableItem key={field.id} value={field.id} asChild>
+							<SortableItem asChild key={field.id} value={field.id}>
 								<Card>
 									<CardHeader>
 										<div className="flex items-center gap-2">
 											<SortableItemHandle asChild>
 												<Button
-													variant="ghost"
-													size="icon"
 													className="cursor-grab active:cursor-grabbing"
+													size="icon"
 													type="button"
+													variant="ghost"
 												>
 													<IconGripVertical className="h-4 w-4 text-muted-foreground" />
 												</Button>
@@ -167,8 +167,8 @@ export function WorkExperienceSection({ control }: WorkExperienceSectionProps) {
 															<Input
 																placeholder="2022-12"
 																{...field}
-																value={field.value ?? ''}
 																disabled={workItems[index]?.isCurrent}
+																value={field.value ?? ''}
 															/>
 														</FormControl>
 														<FormMessage />
@@ -182,10 +182,7 @@ export function WorkExperienceSection({ control }: WorkExperienceSectionProps) {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2 space-y-0 pt-8">
 														<FormControl>
-															<Checkbox
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Current Position</FormLabel>
 													</FormItem>

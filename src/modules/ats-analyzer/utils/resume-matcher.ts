@@ -13,9 +13,9 @@ import type { ResumeContent } from '../schemas'
 import type { ResumeContent as NewResumeContent } from '../types/resume-content'
 import {
 	type ExtractedKeyword,
+	extractCategorizedKeywords,
 	extractKeywords,
 	normalizeKeyword,
-	extractCategorizedKeywords,
 } from './keyword-extractor'
 import type { CategorizedKeyword } from './score-calculator'
 
@@ -250,7 +250,6 @@ function generateFeedback(
 	return parts.join('\n')
 }
 
-
 /**
  * Perform gap analysis between job keywords and resume content
  *
@@ -263,7 +262,7 @@ function generateFeedback(
  */
 export function analyzeGaps(
 	resume: NewResumeContent,
-	jobKeywords: CategorizedKeyword[]
+	jobKeywords: CategorizedKeyword[],
 ): GapAnalysisResult {
 	// Extract resume text for matching
 	const resumeText = newResumeToText(resume)
@@ -286,18 +285,18 @@ export function analyzeGaps(
 
 	// Group gaps by category
 	const gapsByCategory = {
-		hardSkills: sortedMissing.filter(k => k.category === 'hard_skill'),
-		softSkills: sortedMissing.filter(k => k.category === 'soft_skill'),
-		general: sortedMissing.filter(k => k.category === 'general'),
+		general: sortedMissing.filter((k) => k.category === 'general'),
+		hardSkills: sortedMissing.filter((k) => k.category === 'hard_skill'),
+		softSkills: sortedMissing.filter((k) => k.category === 'soft_skill'),
 	}
 
 	// Generate suggestions with priority
 	const suggestions = generateGapSuggestions(sortedMissing)
 
 	return {
+		gapsByCategory,
 		matchedKeywords,
 		missingKeywords: sortedMissing,
-		gapsByCategory,
 		suggestions,
 	}
 }
@@ -307,7 +306,7 @@ export function analyzeGaps(
  */
 export function analyzeGapsFromJobDescription(
 	resume: NewResumeContent,
-	jobDescription: string
+	jobDescription: string,
 ): GapAnalysisResult {
 	const jobKeywords = extractCategorizedKeywords(jobDescription)
 	return analyzeGaps(resume, jobKeywords)
@@ -384,7 +383,7 @@ function extractNewResumeKeywords(resume: NewResumeContent): Set<string> {
 function isKeywordPresent(
 	keyword: string,
 	resumeKeywords: Set<string>,
-	resumeText: string
+	resumeText: string,
 ): boolean {
 	const normalized = normalizeKeyword(keyword)
 
@@ -400,13 +399,13 @@ function isKeywordPresent(
 
 	// Check variations
 	const variations = [
-		normalized.replace(/\s/g, ''),      // Remove spaces
-		normalized.replace(/\s/g, '-'),     // Replace spaces with dash
-		normalized.replace(/-/g, ' '),      // Replace dash with space
-		normalized.replace(/-/g, ''),       // Remove dashes
+		normalized.replace(/\s/g, ''), // Remove spaces
+		normalized.replace(/\s/g, '-'), // Replace spaces with dash
+		normalized.replace(/-/g, ' '), // Replace dash with space
+		normalized.replace(/-/g, ''), // Remove dashes
 	]
 
-	return variations.some(v => resumeKeywords.has(v) || resumeText.includes(v))
+	return variations.some((v) => resumeKeywords.has(v) || resumeText.includes(v))
 }
 
 /**
@@ -414,9 +413,9 @@ function isKeywordPresent(
  */
 export function sortByPriority(keywords: CategorizedKeyword[]): CategorizedKeyword[] {
 	const priorityMap: Record<CategorizedKeyword['category'], number> = {
+		general: 3,
 		hard_skill: 1,
 		soft_skill: 2,
-		general: 3,
 	}
 
 	return [...keywords].sort((a, b) => {
@@ -431,9 +430,9 @@ export function sortByPriority(keywords: CategorizedKeyword[]): CategorizedKeywo
  * Generate suggestions for missing keywords
  */
 function generateGapSuggestions(missingKeywords: CategorizedKeyword[]): GapSuggestion[] {
-	return missingKeywords.map(keyword => ({
-		keyword: keyword.keyword,
+	return missingKeywords.map((keyword) => ({
 		category: keyword.category,
+		keyword: keyword.keyword,
 		priority: getPriority(keyword.category),
 		suggestion: getSuggestionText(keyword),
 	}))

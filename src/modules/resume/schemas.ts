@@ -1,59 +1,22 @@
+import {
+	type LegacyEducation,
+	type LegacyExperience,
+	type LegacyProject,
+	type LegacySkills,
+	legacyEducationSchema,
+	legacyExperienceSchema,
+	legacyProjectSchema,
+	legacySkillsSchema,
+	type ResumeContent,
+	resumeContentSchema,
+} from '@/shared/schemas/resume-content.schema'
 import { z } from 'zod'
 
-// Resume Content Schema - Flexible structure for resume data
-// Note: personalInfo is now managed in userProfile table
-// Note: Experience, Education, Projects, Skills are now in separate tables with many-to-many relationships
-export const resumeContentSchema = z.object({
-	// Step 1 fields (Resume Info)
-	competencies: z.array(z.string()).optional().default([]),
+// Re-export the canonical schema and types
+export { resumeContentSchema, type ResumeContent }
 
-	// DEPRECATED: These fields will be removed as data moves to normalized tables
-	// Keeping for backward compatibility during migration
-	education: z
-		.array(
-			z.object({
-				degree: z.string().min(1, 'Degree is required'),
-				field: z.string().optional(),
-				gpa: z.string().optional(),
-				graduationDate: z.string().optional(),
-				school: z.string().min(1, 'School is required'),
-			}),
-		)
-		.default([]),
-	experience: z
-		.array(
-			z.object({
-				bullets: z.array(z.string()).default([]),
-				company: z.string().min(1, 'Company is required'),
-				current: z.boolean().default(false),
-				description: z.string().optional(),
-				endDate: z.string().optional(),
-				startDate: z.string().min(1, 'Start date is required'),
-				title: z.string().min(1, 'Job title is required'),
-			}),
-		)
-		.default([]),
-	headline: z.string().min(1, 'Headline is required'), // Made required, replaces title
-	projects: z
-		.array(
-			z.object({
-				description: z.string().optional(),
-				name: z.string().min(1, 'Project name is required'),
-				technologies: z.array(z.string()).default([]),
-				url: z.string().optional(),
-			}),
-		)
-		.default([]),
-	skills: z
-		.object({
-			soft: z.array(z.string()).default([]),
-			technical: z.array(z.string()).default([]),
-		})
-		.default({ soft: [], technical: [] }),
-	summary: z.string().optional(),
-})
-
-export type ResumeContent = z.infer<typeof resumeContentSchema>
+// Re-export legacy types for backward compatibility
+export type { LegacyEducation, LegacyExperience, LegacyProject, LegacySkills }
 
 // Step 1 validation - only headline required
 export const step1Schema = z.object({
@@ -64,62 +27,22 @@ export const step1Schema = z.object({
 
 // Step 2 validation - Experience (all optional if array is empty)
 export const step2Schema = z.object({
-	experience: z
-		.array(
-			z.object({
-				bullets: z.array(z.string()).optional().default([]),
-				company: z.string().min(1, 'Company is required'),
-				current: z.boolean().optional().default(false),
-				description: z.string().optional(),
-				endDate: z.string().optional(),
-				startDate: z.string().min(1, 'Start date is required'),
-				title: z.string().min(1, 'Job title is required'),
-			}),
-		)
-		.optional()
-		.default([]),
+	experience: z.array(legacyExperienceSchema).optional().default([]),
 })
 
 // Step 3 validation - Education (all optional if array is empty)
 export const step3Schema = z.object({
-	education: z
-		.array(
-			z.object({
-				degree: z.string().min(1, 'Degree is required'),
-				field: z.string().optional(),
-				gpa: z.string().optional(),
-				graduationDate: z.string().optional(),
-				school: z.string().min(1, 'School is required'),
-			}),
-		)
-		.optional()
-		.default([]),
+	education: z.array(legacyEducationSchema).optional().default([]),
 })
 
 // Step 4 validation - Projects (all optional)
 export const step4Schema = z.object({
-	projects: z
-		.array(
-			z.object({
-				description: z.string().optional(),
-				name: z.string().min(1, 'Project name is required'),
-				technologies: z.array(z.string()).optional().default([]),
-				url: z.string().optional(),
-			}),
-		)
-		.optional()
-		.default([]),
+	projects: z.array(legacyProjectSchema).optional().default([]),
 })
 
 // Step 5 validation - Skills (all optional)
 export const step5Schema = z.object({
-	skills: z
-		.object({
-			soft: z.array(z.string()).optional().default([]),
-			technical: z.array(z.string()).optional().default([]),
-		})
-		.optional()
-		.default({ soft: [], technical: [] }),
+	skills: legacySkillsSchema.optional().default({ soft: [], technical: [] }),
 })
 
 export type Step1Data = z.infer<typeof step1Schema>

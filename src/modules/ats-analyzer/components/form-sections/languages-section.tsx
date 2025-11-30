@@ -19,17 +19,11 @@ interface LanguagesSectionProps {
 	control: Control<ResumeContent>
 }
 
-const FLUENCY_LEVELS = [
-	'Native',
-	'Fluent',
-	'Professional',
-	'Intermediate',
-	'Basic',
-] as const
+const FLUENCY_LEVELS = ['Native', 'Fluent', 'Professional', 'Intermediate', 'Basic'] as const
 
 const createEmptyLanguage = (): ResumeLanguage => ({
-	language: '',
 	fluency: '',
+	language: '',
 })
 
 export function LanguagesSection({ control }: LanguagesSectionProps) {
@@ -46,9 +40,7 @@ export function LanguagesSection({ control }: LanguagesSectionProps) {
 				<div className="flex items-center justify-between">
 					<div>
 						<CardTitle>Languages</CardTitle>
-						<CardDescription>
-							Languages you speak and your proficiency level
-						</CardDescription>
+						<CardDescription>Languages you speak and your proficiency level</CardDescription>
 					</div>
 					<Button
 						onClick={() => append(createEmptyLanguage())}
@@ -63,14 +55,14 @@ export function LanguagesSection({ control }: LanguagesSectionProps) {
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{fields.length === 0 && (
-					<p className="text-center text-muted-foreground text-sm py-4">
+					<p className="py-4 text-center text-muted-foreground text-sm">
 						No languages added yet. Click "Add Language" to get started.
 					</p>
 				)}
 
 				{fields.map((field, index) => (
-					<div key={field.id} className="flex gap-4 items-start">
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 flex-1">
+					<div className="flex items-start gap-4" key={field.id}>
+						<div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-2">
 							<FormField
 								control={control}
 								name={`languages.${index}.language`}
@@ -91,10 +83,7 @@ export function LanguagesSection({ control }: LanguagesSectionProps) {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Fluency Level *</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											value={field.value}
-										>
+										<Select onValueChange={field.onChange} value={field.value}>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Select fluency level" />

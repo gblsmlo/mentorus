@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
-import { ArrowLeft, ExternalLink, RefreshCw, Save, History } from 'lucide-react'
+import { ArrowLeft, ExternalLink, History, RefreshCw, Save } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -79,8 +79,8 @@ export function OptimizationCockpit({
 		score,
 		previousScore,
 	} = useDebouncedAnalysis({
-		jobDescription: job.description,
 		debounceMs: 500,
+		jobDescription: job.description,
 	})
 
 	// Auto-save hook with retry logic
@@ -89,9 +89,13 @@ export function OptimizationCockpit({
 		status: autoSaveStatus,
 		lastSaved,
 	} = useAutoSave({
-		resumeId: resume.id,
 		debounceMs: 2000,
 		maxRetries: 3,
+		onError: (error) => {
+			toast.error('Failed to auto-save. Please save manually.', {
+				description: error.message,
+			})
+		},
 		onSave: async (resumeId, content) => {
 			await saveApplicationResume({
 				applicationId: application.id,
@@ -99,11 +103,7 @@ export function OptimizationCockpit({
 				title: resume.title,
 			})
 		},
-		onError: (error) => {
-			toast.error('Failed to auto-save. Please save manually.', {
-				description: error.message,
-			})
-		},
+		resumeId: resume.id,
 	})
 
 	// Handle form content changes
@@ -118,7 +118,7 @@ export function OptimizationCockpit({
 			// Trigger auto-save
 			autoSave(content)
 		},
-		[analyze, autoSave]
+		[analyze, autoSave],
 	)
 
 	// Handle manual save
@@ -204,10 +204,10 @@ export function OptimizationCockpit({
 		<div className="flex h-[calc(100vh-4rem)] flex-col">
 			{/* Floating Score Badge */}
 			<FloatingScoreBadge
-				score={score}
-				previousScore={previousScore}
-				isCalculating={isAnalyzing}
 				className="top-20 right-6"
+				isCalculating={isAnalyzing}
+				previousScore={previousScore}
+				score={score}
 			/>
 
 			{/* Header */}
@@ -219,7 +219,7 @@ export function OptimizationCockpit({
 							onClick={(e) => {
 								if (hasUnsavedChanges) {
 									const confirmed = window.confirm(
-										'You have unsaved changes. Are you sure you want to leave?'
+										'You have unsaved changes. Are you sure you want to leave?',
 									)
 									if (!confirmed) {
 										e.preventDefault()
@@ -240,9 +240,7 @@ export function OptimizationCockpit({
 						<div className="flex items-center gap-2 text-muted-foreground text-xs">
 							<span>Status: {application.status}</span>
 							{score > 0 && (
-								<Badge variant={score >= 70 ? 'default' : 'secondary'}>
-									Match: {score}%
-								</Badge>
+								<Badge variant={score >= 70 ? 'default' : 'secondary'}>Match: {score}%</Badge>
 							)}
 							{/* Auto-save status */}
 							{getSaveStatusText() && (
@@ -250,7 +248,7 @@ export function OptimizationCockpit({
 									className={cn(
 										'ml-2',
 										autoSaveStatus === 'error' && 'text-destructive',
-										autoSaveStatus === 'saved' && 'text-green-600 dark:text-green-400'
+										autoSaveStatus === 'saved' && 'text-green-600 dark:text-green-400',
 									)}
 								>
 									{getSaveStatusText()}
@@ -260,11 +258,7 @@ export function OptimizationCockpit({
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setIsVersionDrawerOpen(true)}
-					>
+					<Button onClick={() => setIsVersionDrawerOpen(true)} size="sm" variant="outline">
 						<History className="mr-2 h-4 w-4" />
 						History
 					</Button>
@@ -316,7 +310,7 @@ export function OptimizationCockpit({
 							RESUME EDITOR
 						</div>
 						<ScrollArea className="flex-1">
-							<div className="p-6 space-y-6">
+							<div className="space-y-6 p-6">
 								{/* Keyword Analysis Bar */}
 								<KeywordAnalysisBar
 									matchedKeywords={analysisResult?.matchedKeywords || []}
@@ -342,10 +336,10 @@ export function OptimizationCockpit({
 
 			{/* Version History Drawer */}
 			<VersionHistoryDrawer
-				open={isVersionDrawerOpen}
 				onOpenChange={setIsVersionDrawerOpen}
-				versions={versions}
 				onRestore={handleVersionRestore}
+				open={isVersionDrawerOpen}
+				versions={versions}
 			/>
 		</div>
 	)

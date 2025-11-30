@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { CheckCircle2, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { CheckCircle2, ChevronDown, ChevronUp, XCircle } from 'lucide-react'
 import { useState } from 'react'
 import type { CategorizedKeyword } from '../utils/score-calculator'
 
@@ -32,7 +32,9 @@ function getCategoryLabel(category: CategorizedKeyword['category']): string {
 /**
  * Get badge variant for keyword category
  */
-function getCategoryVariant(category: CategorizedKeyword['category']): 'default' | 'secondary' | 'outline' {
+function getCategoryVariant(
+	category: CategorizedKeyword['category'],
+): 'default' | 'secondary' | 'outline' {
 	switch (category) {
 		case 'hard_skill':
 			return 'default'
@@ -46,17 +48,19 @@ function getCategoryVariant(category: CategorizedKeyword['category']): 'default'
 /**
  * Group keywords by category
  */
-function groupByCategory(keywords: CategorizedKeyword[]): Record<CategorizedKeyword['category'], CategorizedKeyword[]> {
+function groupByCategory(
+	keywords: CategorizedKeyword[],
+): Record<CategorizedKeyword['category'], CategorizedKeyword[]> {
 	return keywords.reduce(
 		(acc, keyword) => {
 			acc[keyword.category].push(keyword)
 			return acc
 		},
 		{
+			general: [] as CategorizedKeyword[],
 			hard_skill: [] as CategorizedKeyword[],
 			soft_skill: [] as CategorizedKeyword[],
-			general: [] as CategorizedKeyword[],
-		}
+		},
 	)
 }
 
@@ -87,14 +91,14 @@ function KeywordSection({
 	return (
 		<div className="space-y-2">
 			<button
-				type="button"
+				className="flex w-full items-center justify-between rounded-md px-2 py-1 transition-colors hover:bg-muted/50"
 				onClick={() => setIsExpanded(!isExpanded)}
-				className="flex w-full items-center justify-between rounded-md px-2 py-1 hover:bg-muted/50 transition-colors"
+				type="button"
 			>
 				<div className="flex items-center gap-2">
 					{icon}
 					<span className="font-medium text-sm">{title}</span>
-					<Badge variant="outline" className="text-xs">
+					<Badge className="text-xs" variant="outline">
 						{keywords.length}
 					</Badge>
 				</div>
@@ -110,33 +114,33 @@ function KeywordSection({
 					{/* Hard Skills */}
 					{grouped.hard_skill.length > 0 && (
 						<KeywordGroup
-							label={getCategoryLabel('hard_skill')}
 							keywords={grouped.hard_skill}
-							variant={getCategoryVariant('hard_skill')}
-							type={type}
+							label={getCategoryLabel('hard_skill')}
 							onKeywordClick={onKeywordClick}
+							type={type}
+							variant={getCategoryVariant('hard_skill')}
 						/>
 					)}
 
 					{/* Soft Skills */}
 					{grouped.soft_skill.length > 0 && (
 						<KeywordGroup
-							label={getCategoryLabel('soft_skill')}
 							keywords={grouped.soft_skill}
-							variant={getCategoryVariant('soft_skill')}
-							type={type}
+							label={getCategoryLabel('soft_skill')}
 							onKeywordClick={onKeywordClick}
+							type={type}
+							variant={getCategoryVariant('soft_skill')}
 						/>
 					)}
 
 					{/* General */}
 					{grouped.general.length > 0 && (
 						<KeywordGroup
-							label={getCategoryLabel('general')}
 							keywords={grouped.general}
-							variant={getCategoryVariant('general')}
-							type={type}
+							label={getCategoryLabel('general')}
 							onKeywordClick={onKeywordClick}
+							type={type}
+							variant={getCategoryVariant('general')}
 						/>
 					)}
 				</div>
@@ -160,13 +164,13 @@ function KeywordGroup({ label, keywords, variant, type, onKeywordClick }: Keywor
 			<div className="flex flex-wrap gap-1">
 				{keywords.map((kw) => (
 					<Badge
-						key={kw.keyword}
-						variant={variant}
 						className={cn(
 							'cursor-pointer transition-all hover:scale-105',
-							type === 'missing' && 'opacity-70 border-dashed'
+							type === 'missing' && 'border-dashed opacity-70',
 						)}
+						key={kw.keyword}
 						onClick={() => onKeywordClick?.(kw.keyword, type)}
+						variant={variant}
 					>
 						{kw.keyword}
 						{kw.frequency > 1 && (
@@ -181,7 +185,7 @@ function KeywordGroup({ label, keywords, variant, type, onKeywordClick }: Keywor
 
 /**
  * KeywordAnalysisBar - Displays matched and missing keywords grouped by category
- * 
+ *
  * Requirements: 3.2, 3.3, 4.1, 4.3
  * - Display matched keywords grouped by category (Hard_Skills, Soft_Skills, other)
  * - Display missing keywords sorted by importance (Hard_Skills first, then Soft_Skills)
@@ -196,32 +200,29 @@ export function KeywordAnalysisBar({
 	// Sort missing keywords by priority (hard_skill > soft_skill > general)
 	const sortedMissing = [...missingKeywords].sort((a, b) => {
 		const priorityMap: Record<CategorizedKeyword['category'], number> = {
+			general: 3,
 			hard_skill: 1,
 			soft_skill: 2,
-			general: 3,
 		}
 		return priorityMap[a.category] - priorityMap[b.category]
 	})
 
 	const totalMatched = matchedKeywords.length
 	const totalMissing = missingKeywords.length
-	const matchRate = totalMatched + totalMissing > 0
-		? Math.round((totalMatched / (totalMatched + totalMissing)) * 100)
-		: 0
+	const matchRate =
+		totalMatched + totalMissing > 0
+			? Math.round((totalMatched / (totalMatched + totalMissing)) * 100)
+			: 0
 
 	return (
 		<div className={cn('rounded-lg border bg-card', className)}>
 			{/* Header with summary */}
 			<div className="flex items-center justify-between border-b px-4 py-3">
 				<h3 className="font-semibold text-sm">Keyword Analysis</h3>
-				<div className="flex items-center gap-2 text-xs text-muted-foreground">
-					<span className="text-green-600 dark:text-green-400">
-						{totalMatched} matched
-					</span>
+				<div className="flex items-center gap-2 text-muted-foreground text-xs">
+					<span className="text-green-600 dark:text-green-400">{totalMatched} matched</span>
 					<span>•</span>
-					<span className="text-red-600 dark:text-red-400">
-						{totalMissing} missing
-					</span>
+					<span className="text-red-600 dark:text-red-400">{totalMissing} missing</span>
 					<span>•</span>
 					<span className="font-medium">{matchRate}% coverage</span>
 				</div>
@@ -232,24 +233,22 @@ export function KeywordAnalysisBar({
 				<div className="space-y-4 p-4">
 					{/* Matched Keywords */}
 					<KeywordSection
-						title="Matched Keywords"
 						icon={<CheckCircle2 className="h-4 w-4 text-green-500" />}
 						keywords={matchedKeywords}
-						type="matched"
 						onKeywordClick={onKeywordClick}
+						title="Matched Keywords"
+						type="matched"
 					/>
 
-					{matchedKeywords.length > 0 && missingKeywords.length > 0 && (
-						<Separator />
-					)}
+					{matchedKeywords.length > 0 && missingKeywords.length > 0 && <Separator />}
 
 					{/* Missing Keywords */}
 					<KeywordSection
-						title="Missing Keywords"
 						icon={<XCircle className="h-4 w-4 text-red-500" />}
 						keywords={sortedMissing}
-						type="missing"
 						onKeywordClick={onKeywordClick}
+						title="Missing Keywords"
+						type="missing"
 					/>
 
 					{/* Empty state */}

@@ -264,9 +264,9 @@ export function extractCategorizedKeywords(jobDescription: string): CategorizedK
 		const normalized = skill.toLowerCase()
 		if (!keywords.has(normalized)) {
 			keywords.set(normalized, {
-				keyword: normalized,
 				category: 'hard_skill',
 				frequency: countOccurrences(jobDescription, skill),
+				keyword: normalized,
 			})
 		}
 	}
@@ -277,9 +277,9 @@ export function extractCategorizedKeywords(jobDescription: string): CategorizedK
 		const normalized = tool.toLowerCase()
 		if (!keywords.has(normalized)) {
 			keywords.set(normalized, {
-				keyword: normalized,
 				category: 'hard_skill',
 				frequency: countOccurrences(jobDescription, tool),
+				keyword: normalized,
 			})
 		}
 	}
@@ -290,9 +290,9 @@ export function extractCategorizedKeywords(jobDescription: string): CategorizedK
 		const normalized = skill.toLowerCase().replace(/[\s-]+/g, ' ')
 		if (!keywords.has(normalized)) {
 			keywords.set(normalized, {
-				keyword: normalized,
 				category: 'soft_skill',
 				frequency: countOccurrences(jobDescription, skill),
+				keyword: normalized,
 			})
 		}
 	}
@@ -303,16 +303,16 @@ export function extractCategorizedKeywords(jobDescription: string): CategorizedK
 		const normalized = term.toLowerCase()
 		if (!keywords.has(normalized)) {
 			keywords.set(normalized, {
-				keyword: normalized,
 				category: 'general',
 				frequency: countOccurrences(jobDescription, term),
+				keyword: normalized,
 			})
 		}
 	}
 
 	// Sort by category priority (hard_skill > soft_skill > general) then by frequency
 	return Array.from(keywords.values()).sort((a, b) => {
-		const categoryOrder = { hard_skill: 0, soft_skill: 1, general: 2 }
+		const categoryOrder = { general: 2, hard_skill: 0, soft_skill: 1 }
 		const categoryDiff = categoryOrder[a.category] - categoryOrder[b.category]
 		if (categoryDiff !== 0) return categoryDiff
 		return b.frequency - a.frequency

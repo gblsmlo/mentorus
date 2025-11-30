@@ -2,9 +2,9 @@
 
 import { useCallback, useRef, useState } from 'react'
 import type { ResumeContent } from '../types/resume-content'
+import { extractCategorizedKeywords } from '../utils/keyword-extractor'
 import type { CategorizedKeyword, ScoreResult } from '../utils/score-calculator'
 import { calculateATSScore } from '../utils/score-calculator'
-import { extractCategorizedKeywords } from '../utils/keyword-extractor'
 
 export interface AnalysisResult {
 	score: number
@@ -77,11 +77,11 @@ export function useDebouncedAnalysis({
 				const scoreResult: ScoreResult = calculateATSScore(content, jobKeywords)
 
 				const analysisResult: AnalysisResult = {
-					score: scoreResult.score,
-					previousScore: score > 0 ? score : undefined,
+					breakdown: scoreResult.breakdown,
 					matchedKeywords: scoreResult.matchedKeywords,
 					missingKeywords: scoreResult.missingKeywords,
-					breakdown: scoreResult.breakdown,
+					previousScore: score > 0 ? score : undefined,
+					score: scoreResult.score,
 				}
 
 				// Update previous score before setting new score
@@ -98,7 +98,7 @@ export function useDebouncedAnalysis({
 				setIsAnalyzing(false)
 			}
 		},
-		[getJobKeywords, score, onAnalysisComplete]
+		[getJobKeywords, score, onAnalysisComplete],
 	)
 
 	const analyze = useCallback(
@@ -116,14 +116,14 @@ export function useDebouncedAnalysis({
 				performAnalysis(content)
 			}, debounceMs)
 		},
-		[debounceMs, performAnalysis]
+		[debounceMs, performAnalysis],
 	)
 
 	return {
 		analyze,
-		result,
 		isAnalyzing,
-		score,
 		previousScore,
+		result,
+		score,
 	}
 }
