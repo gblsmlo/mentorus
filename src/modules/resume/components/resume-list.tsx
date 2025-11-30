@@ -60,7 +60,7 @@ export function ResumeList({ resumes, userId }: ResumeListProps) {
 	return (
 		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{resumes.map((resume) => (
-				<Link href={`/resumes/${resume.id}`} key={resume.id}>
+				<Link href={`/dashboard/resume/${resume.id}`} key={resume.id}>
 					<Card className="transition-shadow hover:shadow-lg hover:outline-1" key={resume.id}>
 						<CardHeader className="relative gap-4">
 							<div className="flex items-start justify-between">
@@ -77,15 +77,15 @@ export function ResumeList({ resumes, userId }: ResumeListProps) {
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="start" className="w-56">
 										<DropdownMenuItem>
-											<Link href={`/resumes/${resume.id}/analyze`}>Analyze</Link>
+											<Link href={`/dashboard/resume/${resume.id}/analyze`}>Analyze</Link>
 										</DropdownMenuItem>
 										<DropdownMenuSeparator />
 										<DropdownMenuGroup>
 											<DropdownMenuItem>
-												<Link href={`/resumes/${resume.id}`}>Open</Link>
+												<Link href={`/dashboard/resume/${resume.id}`}>Open</Link>
 											</DropdownMenuItem>
 											<DropdownMenuItem>
-												<Link href={`/resumes/${resume.id}/edit`}>Edit</Link>
+												<Link href={`/dashboard/resume/${resume.id}/edit`}>Edit</Link>
 											</DropdownMenuItem>
 											<DropdownMenuItem onClick={() => handleDuplicate(resume.id, resume.headline)}>
 												Duplicate

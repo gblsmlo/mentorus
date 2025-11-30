@@ -18,7 +18,7 @@ interface AnalysisDashboardProps {
 	currentVersionId?: string
 }
 
-export function AnalysisDashboard({ userId, resumeId, currentVersionId }: AnalysisDashboardProps) {
+export function AnalysisDashboard({ userId, currentVersionId }: AnalysisDashboardProps) {
 	const [jobTitle, setJobTitle] = useState('')
 	const [jobCompany, setJobCompany] = useState('')
 	const [jobDescription, setJobDescription] = useState('')

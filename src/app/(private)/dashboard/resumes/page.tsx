@@ -39,7 +39,7 @@ export default async function ResumesPage() {
 				</PageHeaderLeft>
 				<PageHeaderRight>
 					<Button asChild>
-						<Link href="/dashboard/resumes/new">New Resume</Link>
+						<Link href="/dashboard/resume/new">New Resume</Link>
 					</Button>
 				</PageHeaderRight>
 			</PageHeaderWithCTA>

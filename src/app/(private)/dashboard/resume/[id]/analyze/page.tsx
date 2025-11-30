@@ -20,10 +20,14 @@ export default async function AnalyzePage({ params }: { params: Promise<{ id: st
 	const { id } = await params
 	const resume = await getResume(session.user.id, id)
 
+	if (!resume) {
+		redirect('/error')
+	}
+
 	return (
 		<MainContent size="xl">
 			<PageHeader>
-				<PageTitle>Analyze: {resume.title}</PageTitle>
+				<PageTitle>Analyze: {resume.headline}</PageTitle>
 				<PageDescription>
 					Compare your resume against job descriptions to optimize your match score
 				</PageDescription>
