@@ -1,6 +1,15 @@
 /**
  * Keyword Extractor - Extract meaningful keywords from job descriptions
+ *
+ * Categorizes keywords into:
+ * - hard_skill: Technical skills (programming languages, frameworks, tools)
+ * - soft_skill: Interpersonal and behavioral skills
+ * - general: Other relevant keywords
+ *
+ * Requirements: 3.1, 3.2
  */
+
+import type { CategorizedKeyword } from './score-calculator'
 
 // Common stop words to filter out
 const STOP_WORDS = new Set([
@@ -41,20 +50,41 @@ const STOP_WORDS = new Set([
 	'their',
 ])
 
-// Common technical skill patterns
-const TECH_SKILL_PATTERNS = [
+// Hard skills - Technical skills with high weight (60%)
+const HARD_SKILL_PATTERNS = [
 	// Programming languages
-	/\b(javascript|typescript|python|java|c\+\+|c#|ruby|go|rust|php|swift|kotlin|scala)\b/gi,
-	// Frameworks
-	/\b(react|vue|angular|next\.?js|nuxt|svelte|express|nestjs|django|flask|spring|laravel)\b/gi,
+	/\b(javascript|typescript|python|java|c\+\+|c#|ruby|go|rust|php|swift|kotlin|scala|sql|html|css|sass|less)\b/gi,
+	// Frameworks & Libraries
+	/\b(react|vue|angular|next\.?js|nuxt|svelte|express|nestjs|django|flask|spring|laravel|rails|fastapi|gatsby)\b/gi,
 	// Databases
-	/\b(postgresql|postgres|mysql|mongodb|redis|elasticsearch|dynamodb|cassandra)\b/gi,
+	/\b(postgresql|postgres|mysql|mongodb|redis|elasticsearch|dynamodb|cassandra|sqlite|oracle|mariadb)\b/gi,
 	// Cloud/DevOps
-	/\b(aws|azure|gcp|docker|kubernetes|k8s|terraform|jenkins|gitlab|github actions)\b/gi,
-	// Tools & Methodologies
-	/\b(git|agile|scrum|ci\/cd|restful|graphql|microservices|api)\b/gi,
+	/\b(aws|azure|gcp|docker|kubernetes|k8s|terraform|jenkins|gitlab|github actions|circleci|ansible|puppet)\b/gi,
+	// Tools & Technologies
+	/\b(git|graphql|rest\s?api|restful|microservices|webpack|vite|babel|npm|yarn|pnpm)\b/gi,
+	// Testing
+	/\b(jest|vitest|cypress|playwright|selenium|mocha|pytest|junit|testing library)\b/gi,
+	// Data & ML
+	/\b(machine learning|deep learning|tensorflow|pytorch|pandas|numpy|scikit-learn|data science)\b/gi,
 ]
 
+// Soft skills - Interpersonal skills with medium weight (30%)
+const SOFT_SKILL_PATTERNS = [
+	/\b(communication|teamwork|leadership|problem[\s-]?solving|critical[\s-]?thinking)\b/gi,
+	/\b(time[\s-]?management|adaptability|creativity|collaboration|attention to detail)\b/gi,
+	/\b(organization|initiative|flexibility|interpersonal|work[\s-]?ethic)\b/gi,
+	/\b(self[\s-]?motivated|proactive|analytical|decision[\s-]?making|mentoring)\b/gi,
+	/\b(presentation|negotiation|conflict[\s-]?resolution|empathy|patience)\b/gi,
+]
+
+// Tools - Treated as hard skills in matching
+const TOOL_PATTERNS = [
+	/\b(jira|confluence|slack|notion|figma|sketch|adobe|photoshop|illustrator)\b/gi,
+	/\b(vs\s?code|visual studio|intellij|webstorm|xcode|android studio)\b/gi,
+	/\b(postman|insomnia|swagger|openapi)\b/gi,
+]
+
+// Legacy interface for backward compatibility
 export interface ExtractedKeyword {
 	keyword: string
 	weight: number // 0-1 score
@@ -213,4 +243,131 @@ export function normalizeKeyword(keyword: string): string {
 		.trim()
 		.replace(/[^a-z0-9\s]/g, '')
 		.replace(/\s+/g, ' ')
+}
+
+/**
+ * Extract and categorize keywords from job description
+ *
+ * Returns keywords categorized as:
+ * - hard_skill: Technical skills (60% weight in scoring)
+ * - soft_skill: Interpersonal skills (30% weight in scoring)
+ * - general: Other relevant keywords (10% weight via density)
+ *
+ * Requirements: 3.1, 3.2
+ */
+export function extractCategorizedKeywords(jobDescription: string): CategorizedKeyword[] {
+	const keywords: Map<string, CategorizedKeyword> = new Map()
+
+	// 1. Extract hard skills (highest priority)
+	const hardSkills = extractPatternMatches(jobDescription, HARD_SKILL_PATTERNS)
+	for (const skill of hardSkills) {
+		const normalized = skill.toLowerCase()
+		if (!keywords.has(normalized)) {
+			keywords.set(normalized, {
+				keyword: normalized,
+				category: 'hard_skill',
+				frequency: countOccurrences(jobDescription, skill),
+			})
+		}
+	}
+
+	// 2. Extract tools (treated as hard skills)
+	const tools = extractPatternMatches(jobDescription, TOOL_PATTERNS)
+	for (const tool of tools) {
+		const normalized = tool.toLowerCase()
+		if (!keywords.has(normalized)) {
+			keywords.set(normalized, {
+				keyword: normalized,
+				category: 'hard_skill',
+				frequency: countOccurrences(jobDescription, tool),
+			})
+		}
+	}
+
+	// 3. Extract soft skills
+	const softSkills = extractPatternMatches(jobDescription, SOFT_SKILL_PATTERNS)
+	for (const skill of softSkills) {
+		const normalized = skill.toLowerCase().replace(/[\s-]+/g, ' ')
+		if (!keywords.has(normalized)) {
+			keywords.set(normalized, {
+				keyword: normalized,
+				category: 'soft_skill',
+				frequency: countOccurrences(jobDescription, skill),
+			})
+		}
+	}
+
+	// 4. Extract general keywords (significant terms not already categorized)
+	const generalTerms = extractSignificantTerms(jobDescription)
+	for (const term of generalTerms) {
+		const normalized = term.toLowerCase()
+		if (!keywords.has(normalized)) {
+			keywords.set(normalized, {
+				keyword: normalized,
+				category: 'general',
+				frequency: countOccurrences(jobDescription, term),
+			})
+		}
+	}
+
+	// Sort by category priority (hard_skill > soft_skill > general) then by frequency
+	return Array.from(keywords.values()).sort((a, b) => {
+		const categoryOrder = { hard_skill: 0, soft_skill: 1, general: 2 }
+		const categoryDiff = categoryOrder[a.category] - categoryOrder[b.category]
+		if (categoryDiff !== 0) return categoryDiff
+		return b.frequency - a.frequency
+	})
+}
+
+/**
+ * Extract matches from text using pattern array
+ */
+function extractPatternMatches(text: string, patterns: RegExp[]): string[] {
+	const matches: Set<string> = new Set()
+
+	for (const pattern of patterns) {
+		// Reset lastIndex for global patterns
+		pattern.lastIndex = 0
+		const found = text.matchAll(pattern)
+		for (const match of found) {
+			if (match[0]) {
+				matches.add(match[0].toLowerCase())
+			}
+		}
+	}
+
+	return Array.from(matches)
+}
+
+/**
+ * Get category for a keyword (useful for external categorization)
+ */
+export function categorizeKeyword(keyword: string): 'hard_skill' | 'soft_skill' | 'general' {
+	const testText = ` ${keyword} `
+
+	// Check hard skills
+	for (const pattern of HARD_SKILL_PATTERNS) {
+		pattern.lastIndex = 0
+		if (pattern.test(testText)) {
+			return 'hard_skill'
+		}
+	}
+
+	// Check tools (treated as hard skills)
+	for (const pattern of TOOL_PATTERNS) {
+		pattern.lastIndex = 0
+		if (pattern.test(testText)) {
+			return 'hard_skill'
+		}
+	}
+
+	// Check soft skills
+	for (const pattern of SOFT_SKILL_PATTERNS) {
+		pattern.lastIndex = 0
+		if (pattern.test(testText)) {
+			return 'soft_skill'
+		}
+	}
+
+	return 'general'
 }

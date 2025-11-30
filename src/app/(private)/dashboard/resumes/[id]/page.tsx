@@ -29,7 +29,7 @@ export default async function EditResumePage({ params }: { params: Promise<{ id:
 	return (
 		<MainContent size="xl">
 			<PageHeader>
-				<PageTitle>{resume.title}</PageTitle>
+				<PageTitle>{resume.headline}</PageTitle>
 				<PageDescription>Edit your resume or view version history</PageDescription>
 			</PageHeader>
 
@@ -43,7 +43,7 @@ export default async function EditResumePage({ params }: { params: Promise<{ id:
 					<UpdateResumeForm
 						initialData={{
 							content: (resume.currentVersion?.content || {}) as ResumeContent,
-							title: resume.title,
+							title: resume.headline,
 						}}
 						resumeId={resume.id}
 						userId={session.user.id}

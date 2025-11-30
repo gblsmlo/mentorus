@@ -25,7 +25,7 @@ interface UpdateResumeFormProps {
 	userId: string
 	resumeId: string
 	initialData: {
-		title: string
+		headline: string
 		content: ResumeContent
 	}
 	onSuccess?: () => void
@@ -44,7 +44,7 @@ export function UpdateResumeForm({
 	const form = useForm({
 		defaultValues: {
 			content: initialData.content,
-			title: initialData.title,
+			headline: initialData.headline,
 		},
 		mode: 'onChange',
 		resolver: zodResolver(createResumeSchema),
@@ -87,10 +87,10 @@ export function UpdateResumeForm({
 	// Check if current step can advance
 	const canAdvance = useMemo(() => {
 		const errors = form.formState.errors
-		const title = form.getValues('title')
+		const headline = form.getValues('content.headline')
 
-		if (!title || title.trim() === '') return false
-		if (errors.title) return false
+		if (!headline || headline.trim() === '') return false
+		if (errors.content?.headline) return false
 
 		return true
 	}, [form.formState.errors, form])
