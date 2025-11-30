@@ -11,7 +11,7 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Stepper } from '@/components/ui/stepper'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -37,8 +37,10 @@ interface ResumeFormProps {
 
 export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeFormProps) {
 	const router = useRouter()
+	const [currentStep, setCurrentStep] = useState(0)
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [commitMessage, setCommitMessage] = useState('')
+	const steps = ['Personal', 'Experience', 'Education', 'Skills', 'Projects', 'Review']
 
 	const form = useForm({
 		defaultValues: initialData || {
@@ -65,8 +67,50 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 			},
 			title: '',
 		},
+		mode: 'onChange', // Enable validation on change for better UX
 		resolver: zodResolver(createResumeSchema),
 	})
+
+	// Mapping steps to field names for validation
+	const stepFields = [
+		['content.personalInfo'], // Personal
+		['content.experience'], // Experience
+		['content.education'], // Education
+		['content.skills'], // Skills
+		['content.projects'], // Projects
+		[], // Review (no specific fields to validate before entering)
+	]
+
+	const nextStep = async () => {
+		const fields = stepFields[currentStep]
+		const isValid = await form.trigger(fields as any)
+
+		if (isValid) {
+			if (currentStep < steps.length - 1) {
+				setCurrentStep((prev) => prev + 1)
+				// Auto-save draft logic could go here
+				if (resumeId || onSave) {
+					// Silent save
+					const values = form.getValues()
+					if (onSave) {
+						await onSave(values as any)
+					} else if (resumeId) {
+						await updateResume(userId, {
+							commitMessage: 'Auto-save: Step ' + steps[currentStep],
+							content: values.content,
+							resumeId,
+						})
+					}
+				}
+			}
+		}
+	}
+
+	const prevStep = () => {
+		if (currentStep > 0) {
+			setCurrentStep((prev) => prev - 1)
+		}
+	}
 
 	async function onSubmit(data: { title: string; content: ResumeContent }) {
 		setIsSubmitting(true)
@@ -102,96 +146,123 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 	}
 
 	return (
-		<Form {...form}>
-			<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-				{/* Resume Title */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Resume Information</CardTitle>
-						<CardDescription>Give your resume a descriptive title</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<FormField
-							control={form.control}
-							name="title"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Resume Title</FormLabel>
-									<FormControl>
-										<Input placeholder="e.g., Software Engineer Resume" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</CardContent>
-				</Card>
+		<div className="space-y-8">
+			<Stepper currentStep={currentStep} steps={steps} />
 
-				{/* Main Content Tabs */}
-				<Tabs className="w-full" defaultValue="personal">
-					<TabsList className="grid w-full grid-cols-5">
-						<TabsTrigger value="personal">Personal</TabsTrigger>
-						<TabsTrigger value="experience">Experience</TabsTrigger>
-						<TabsTrigger value="education">Education</TabsTrigger>
-						<TabsTrigger value="skills">Skills</TabsTrigger>
-						<TabsTrigger value="projects">Projects</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="personal">
-						<PersonalInfoSection control={form.control} />
-					</TabsContent>
-
-					<TabsContent value="experience">
-						<ExperienceSection control={form.control} />
-					</TabsContent>
-
-					<TabsContent value="education">
-						<EducationSection control={form.control} />
-					</TabsContent>
-
-					<TabsContent value="skills">
-						<SkillsSection control={form.control} />
-					</TabsContent>
-
-					<TabsContent value="projects">
-						<ProjectsSection control={form.control} />
-					</TabsContent>
-				</Tabs>
-
-				{/* Commit Message (only for updates) */}
-				{resumeId && (
+			<Form {...form}>
+				<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+					{/* Resume Title - Only show on first step or make it always visible? 
+                        Decision: Keep it always visible but maybe smaller or just part of Personal step.
+                        For now, keeping it at the top but maybe we can move it to Personal step later.
+                    */}
 					<Card>
 						<CardHeader>
-							<CardTitle>Version Message (Optional)</CardTitle>
-							<CardDescription>
-								Describe what changed in this version (like a Git commit message)
-							</CardDescription>
+							<CardTitle>Resume Information</CardTitle>
+							<CardDescription>Give your resume a descriptive title</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<Input
-								onChange={(e) => setCommitMessage(e.target.value)}
-								placeholder="e.g., Added React skills and recent project"
-								value={commitMessage}
+							<FormField
+								control={form.control}
+								name="title"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Resume Title</FormLabel>
+										<FormControl>
+											<Input placeholder="e.g., Software Engineer Resume" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
 							/>
 						</CardContent>
 					</Card>
-				)}
 
-				{/* Submit Button */}
-				<div className="flex justify-end gap-4">
-					<Button
-						disabled={isSubmitting}
-						onClick={() => router.back()}
-						type="button"
-						variant="outline"
-					>
-						Cancel
-					</Button>
-					<Button disabled={isSubmitting} type="submit">
-						{isSubmitting ? 'Saving...' : resumeId ? 'Save New Version' : 'Create Resume'}
-					</Button>
-				</div>
-			</form>
-		</Form>
+					<div className="min-h-[400px]">
+						{currentStep === 0 && (
+							<div className="fade-in slide-in-from-right-4 animate-in space-y-4 duration-300">
+								<h2 className="font-semibold text-xl">Personal Information</h2>
+								<PersonalInfoSection control={form.control} />
+							</div>
+						)}
+						{currentStep === 1 && (
+							<div className="fade-in slide-in-from-right-4 animate-in space-y-4 duration-300">
+								<h2 className="font-semibold text-xl">Experience</h2>
+								<ExperienceSection control={form.control} />
+							</div>
+						)}
+						{currentStep === 2 && (
+							<div className="fade-in slide-in-from-right-4 animate-in space-y-4 duration-300">
+								<h2 className="font-semibold text-xl">Education</h2>
+								<EducationSection control={form.control} />
+							</div>
+						)}
+						{currentStep === 3 && (
+							<div className="fade-in slide-in-from-right-4 animate-in space-y-4 duration-300">
+								<h2 className="font-semibold text-xl">Skills</h2>
+								<SkillsSection control={form.control} />
+							</div>
+						)}
+						{currentStep === 4 && (
+							<div className="fade-in slide-in-from-right-4 animate-in space-y-4 duration-300">
+								<h2 className="font-semibold text-xl">Projects</h2>
+								<ProjectsSection control={form.control} />
+							</div>
+						)}
+						{currentStep === 5 && (
+							<div className="fade-in slide-in-from-right-4 animate-in space-y-4 duration-300">
+								<h2 className="font-semibold text-xl">Review & Finish</h2>
+								<Card>
+									<CardHeader>
+										<CardTitle>Ready to finalize?</CardTitle>
+										<CardDescription>
+											Review your information. You can go back to edit any section.
+										</CardDescription>
+									</CardHeader>
+									<CardContent className="space-y-4">
+										{resumeId && (
+											<div className="space-y-2">
+												<FormLabel>Version Message (Optional)</FormLabel>
+												<Input
+													onChange={(e) => setCommitMessage(e.target.value)}
+													placeholder="e.g., Added React skills and recent project"
+													value={commitMessage}
+												/>
+											</div>
+										)}
+										<div className="rounded-md bg-muted p-4">
+											<p className="text-muted-foreground text-sm">
+												Click "Finish" to save your resume. You can always edit it later.
+											</p>
+										</div>
+									</CardContent>
+								</Card>
+							</div>
+						)}
+					</div>
+
+					{/* Navigation Buttons */}
+					<div className="flex justify-between border-t pt-4">
+						<Button
+							disabled={isSubmitting}
+							onClick={currentStep === 0 ? () => router.back() : prevStep}
+							type="button"
+							variant="outline"
+						>
+							{currentStep === 0 ? 'Cancel' : 'Back'}
+						</Button>
+
+						{currentStep === steps.length - 1 ? (
+							<Button disabled={isSubmitting} type="submit">
+								{isSubmitting ? 'Saving...' : 'Finish'}
+							</Button>
+						) : (
+							<Button disabled={isSubmitting} onClick={nextStep} type="button">
+								Next
+							</Button>
+						)}
+					</div>
+				</form>
+			</Form>
+		</div>
 	)
 }
