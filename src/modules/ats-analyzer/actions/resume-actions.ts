@@ -10,12 +10,42 @@ import {
 	restoreVersionSchema,
 	updateResumeSchema,
 } from '../schemas'
+import { getUserProfile } from './profile-actions'
 
 /**
  * Create a new resume with initial version (v1)
+ * Automatically seeds with data from Master Profile to prevent re-entry
  */
 export async function createResume(userId: string, data: unknown) {
 	const validated = createResumeSchema.parse(data)
+
+	// Get user's master profile to seed personal info
+	const masterProfile = await getUserProfile(userId)
+
+	// Merge master profile data with provided content
+	const seededContent = {
+		...validated.content,
+		education:
+			validated.content.education.length > 0
+				? validated.content.education
+				: masterProfile?.education || [],
+		personalInfo: masterProfile?.personalInfo || validated.content.personalInfo,
+		skills: {
+			certifications: [
+				...(masterProfile?.skills?.certifications || []),
+				...validated.content.skills.certifications,
+			],
+			languages: [
+				...(masterProfile?.skills?.languages || []),
+				...validated.content.skills.languages,
+			],
+			soft: [...(masterProfile?.skills?.soft || []), ...validated.content.skills.soft],
+			technical: [
+				...(masterProfile?.skills?.technical || []),
+				...validated.content.skills.technical,
+			],
+		},
+	}
 
 	const [newResume] = await db
 		.insert(resume)
@@ -25,12 +55,68 @@ export async function createResume(userId: string, data: unknown) {
 		})
 		.returning()
 
-	// Create version 1
+	// Create version 1 with seeded content
 	const [version1] = await db
 		.insert(resumeVersion)
 		.values({
-			commitMessage: 'Initial version',
-			content: validated.content,
+			commitMessage: 'Initial version (seeded from Master Profile)',
+			content: seededContent,
+			resumeId: newResume.id,
+			versionNumber: 1,
+		})
+		.returning()
+
+	// Update resume to point to currentVersionId
+	await db.update(resume).set({ currentVersionId: version1.id }).where(eq(resume.id, newResume.id))
+
+	revalidatePath('/resumes')
+
+	return {
+		resumeId: newResume.id,
+		versionId: version1.id,
+		versionNumber: 1,
+	}
+}
+
+/**
+ * Duplicate an existing resume (deep copy)
+ * Creates a new resume with content from the source resume's latest version
+ */
+export async function duplicateResume(userId: string, sourceResumeId: string, newTitle: string) {
+	// Verify ownership of source resume
+	const sourceResume = await db.query.resume.findFirst({
+		where: and(eq(resume.id, sourceResumeId), eq(resume.userId, userId)),
+	})
+
+	if (!sourceResume) {
+		throw new Error('Source resume not found or access denied')
+	}
+
+	// Get the latest version of the source resume
+	const latestVersion = await db.query.resumeVersion.findFirst({
+		orderBy: [desc(resumeVersion.versionNumber)],
+		where: eq(resumeVersion.resumeId, sourceResumeId),
+	})
+
+	if (!latestVersion) {
+		throw new Error('No versions found for source resume')
+	}
+
+	// Create new resume
+	const [newResume] = await db
+		.insert(resume)
+		.values({
+			title: newTitle,
+			userId,
+		})
+		.returning()
+
+	// Create version 1 with copied content
+	const [version1] = await db
+		.insert(resumeVersion)
+		.values({
+			commitMessage: `Duplicated from "${sourceResume.title}"`,
+			content: latestVersion.content, // Deep copy of source content
 			resumeId: newResume.id,
 			versionNumber: 1,
 		})

@@ -34,7 +34,7 @@ export default async function ResumesPage() {
 				</Button>
 			</div>
 
-			<ResumeList resumes={resumes} />
+			<ResumeList resumes={resumes} userId={session.user.id} />
 		</MainContent>
 	)
 }

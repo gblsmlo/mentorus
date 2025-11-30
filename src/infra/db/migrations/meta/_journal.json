@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1764382621628,
-      "tag": "0000_lucky_whiplash",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1764467470429,
-      "tag": "0001_lazy_ikaris",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1764467695319,
-      "tag": "0002_shocking_starbolt",
+      "when": 1764473672646,
+      "tag": "0000_open_jasper_sitwell",
       "breakpoints": true
     }
   ]
