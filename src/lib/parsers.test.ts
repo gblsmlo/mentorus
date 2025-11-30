@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import * as fc from 'fast-check'
+import { describe, expect, it } from 'vitest'
 import { parseCommaSeparated } from './parsers'
 
 /**
@@ -13,7 +13,7 @@ import { parseCommaSeparated } from './parsers'
 describe('Property 1: Comma-separated input conversion', () => {
 	it('should produce trimmed, non-empty strings for any comma-separated input', () => {
 		// Arbitrary for strings that may contain commas, spaces, and various characters
-		const commaSeparatedStringArb = fc.string({ minLength: 0, maxLength: 200 })
+		const commaSeparatedStringArb = fc.string({ maxLength: 200, minLength: 0 })
 
 		fc.assert(
 			fc.property(commaSeparatedStringArb, (input) => {
@@ -44,9 +44,10 @@ describe('Property 1: Comma-separated input conversion', () => {
 		// Generate arrays of non-empty strings that don't contain commas (valid input segments)
 		// We filter out commas because they would cause additional splits when joined
 		const validSegmentsArb = fc.array(
-			fc.string({ minLength: 1, maxLength: 30 })
+			fc
+				.string({ maxLength: 30, minLength: 1 })
 				.filter((s) => s.trim().length > 0 && !s.includes(',')),
-			{ minLength: 1, maxLength: 10 },
+			{ maxLength: 10, minLength: 1 },
 		)
 
 		fc.assert(

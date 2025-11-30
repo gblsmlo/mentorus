@@ -22,7 +22,7 @@ export default async function ResumesPage() {
 	const resumes = await getUserResumesAction(session.user.id)
 
 	return (
-		<MainContent size="lg">
+		<MainContent size="2xl">
 			<div className="flex items-center justify-between">
 				<PageHeader>
 					<PageTitle>My Resumes</PageTitle>

@@ -55,7 +55,6 @@ export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResum
 
 	const isSubmitPending = isPending || form.formState.isSubmitting
 
-	// Define wizard steps
 	const wizardSteps: WizardStep[] = useMemo(
 		() => [
 			{

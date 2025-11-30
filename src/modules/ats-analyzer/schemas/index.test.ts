@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import * as fc from 'fast-check'
+import { describe, expect, it } from 'vitest'
 import { resumeContentSchema } from './index'
 
 /**
@@ -13,10 +13,10 @@ import { resumeContentSchema } from './index'
 describe('Property 8: Skills field mapping', () => {
 	it('should store soft skills in skills.soft and technical skills in skills.technical without cross-contamination', () => {
 		// Arbitrary for non-empty skill strings (simulating user input)
-		const skillArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const skillArb = fc.string({ maxLength: 50, minLength: 1 }).filter((s) => s.trim().length > 0)
 
 		// Arbitrary for arrays of skills
-		const skillsArrayArb = fc.array(skillArb, { minLength: 0, maxLength: 10 })
+		const skillsArrayArb = fc.array(skillArb, { maxLength: 10, minLength: 0 })
 
 		fc.assert(
 			fc.property(
@@ -65,10 +65,13 @@ describe('Property 8: Skills field mapping', () => {
 	it('should preserve skill order within each category', () => {
 		// Arbitrary for ordered arrays of unique skills
 		const uniqueSkillsArb = fc
-			.array(fc.string({ minLength: 1, maxLength: 30 }).filter((s) => s.trim().length > 0), {
-				minLength: 1,
-				maxLength: 10,
-			})
+			.array(
+				fc.string({ maxLength: 30, minLength: 1 }).filter((s) => s.trim().length > 0),
+				{
+					maxLength: 10,
+					minLength: 1,
+				},
+			)
 			.map((arr) => [...new Set(arr)]) // Ensure uniqueness
 
 		fc.assert(
@@ -109,14 +112,14 @@ describe('Property 9: Optional fields schema acceptance', () => {
 		const optionalStringArb = fc.oneof(
 			fc.constant(undefined),
 			fc.constant(''),
-			fc.string({ minLength: 1, maxLength: 100 }),
+			fc.string({ maxLength: 100, minLength: 1 }),
 		)
 
 		// Arbitrary for optional string array (undefined, empty array, or array with strings)
 		const optionalStringArrayArb = fc.oneof(
 			fc.constant(undefined),
 			fc.constant([]),
-			fc.array(fc.string({ minLength: 1, maxLength: 50 }), { minLength: 1, maxLength: 5 }),
+			fc.array(fc.string({ maxLength: 50, minLength: 1 }), { maxLength: 5, minLength: 1 }),
 		)
 
 		fc.assert(
@@ -143,7 +146,6 @@ describe('Property 9: Optional fields schema acceptance', () => {
 	})
 })
 
-
 /**
  * Feature: resume-form-wizard-refactor, Property 10: New fields persistence
  * Validates: Requirements 6.1
@@ -155,12 +157,12 @@ describe('Property 9: Optional fields schema acceptance', () => {
 describe('Property 10: New fields persistence', () => {
 	it('should preserve headline, about, and competencies through JSON round-trip', () => {
 		// Arbitrary for non-empty strings (to ensure we're testing actual values)
-		const nonEmptyStringArb = fc.string({ minLength: 1, maxLength: 100 })
+		const nonEmptyStringArb = fc.string({ maxLength: 100, minLength: 1 })
 
 		// Arbitrary for non-empty string arrays
-		const nonEmptyStringArrayArb = fc.array(fc.string({ minLength: 1, maxLength: 50 }), {
-			minLength: 1,
+		const nonEmptyStringArrayArb = fc.array(fc.string({ maxLength: 50, minLength: 1 }), {
 			maxLength: 10,
+			minLength: 1,
 		})
 
 		fc.assert(
@@ -170,9 +172,9 @@ describe('Property 10: New fields persistence', () => {
 				nonEmptyStringArrayArb, // competencies
 				(headline, about, competencies) => {
 					const originalContent = {
-						headline,
 						about,
 						competencies,
+						headline,
 					}
 
 					// Parse through schema to get normalized form
@@ -204,7 +206,6 @@ describe('Property 10: New fields persistence', () => {
 	})
 })
 
-
 /**
  * Feature: resume-form-wizard-refactor, Property 3: Experience required fields validation
  * Validates: Requirements 2.2
@@ -218,7 +219,9 @@ describe('Property 10: New fields persistence', () => {
 describe('Property 3: Experience required fields validation', () => {
 	it('should fail validation when any required experience field is empty string', () => {
 		// Arbitrary for valid non-empty strings
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		// Test each required field being empty string (the only value that fails .min(1))
 		fc.assert(
@@ -226,14 +229,14 @@ describe('Property 3: Experience required fields validation', () => {
 				validStringArb, // company
 				validStringArb, // title
 				validStringArb, // startDate
-				fc.integer({ min: 0, max: 2 }), // which field to make empty (0=company, 1=title, 2=startDate)
+				fc.integer({ max: 2, min: 0 }), // which field to make empty (0=company, 1=title, 2=startDate)
 				(company, title, startDate, fieldToEmpty) => {
 					const experience = {
-						company: fieldToEmpty === 0 ? '' : company,
-						title: fieldToEmpty === 1 ? '' : title,
-						startDate: fieldToEmpty === 2 ? '' : startDate,
-						current: false,
 						bullets: [],
+						company: fieldToEmpty === 0 ? '' : company,
+						current: false,
+						startDate: fieldToEmpty === 2 ? '' : startDate,
+						title: fieldToEmpty === 1 ? '' : title,
 					}
 
 					const content = {
@@ -265,7 +268,9 @@ describe('Property 3: Experience required fields validation', () => {
 
 	it('should pass validation when all required experience fields are provided', () => {
 		// Arbitrary for valid non-empty strings
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		fc.assert(
 			fc.property(
@@ -273,14 +278,14 @@ describe('Property 3: Experience required fields validation', () => {
 				validStringArb, // title
 				validStringArb, // startDate
 				fc.boolean(), // current
-				fc.array(fc.string(), { minLength: 0, maxLength: 5 }), // bullets
+				fc.array(fc.string(), { maxLength: 5, minLength: 0 }), // bullets
 				(company, title, startDate, current, bullets) => {
 					const experience = {
-						company,
-						title,
-						startDate,
-						current,
 						bullets,
+						company,
+						current,
+						startDate,
+						title,
 					}
 
 					const content = {
@@ -298,7 +303,6 @@ describe('Property 3: Experience required fields validation', () => {
 	})
 })
 
-
 /**
  * Feature: resume-form-wizard-refactor, Property 4: Current position endDate optionality
  * Validates: Requirements 2.4
@@ -309,13 +313,15 @@ describe('Property 3: Experience required fields validation', () => {
 describe('Property 4: Current position endDate optionality', () => {
 	it('should pass validation for current positions regardless of endDate value', () => {
 		// Arbitrary for valid non-empty strings (required fields)
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		// Arbitrary for various endDate values (undefined, empty, or valid date string)
 		const endDateArb = fc.oneof(
 			fc.constant(undefined),
 			fc.constant(''),
-			fc.string({ minLength: 1, maxLength: 20 }), // e.g., "Dec 2023", "2023-12"
+			fc.string({ maxLength: 20, minLength: 1 }), // e.g., "Dec 2023", "2023-12"
 		)
 
 		fc.assert(
@@ -324,14 +330,14 @@ describe('Property 4: Current position endDate optionality', () => {
 				validStringArb, // title
 				validStringArb, // startDate
 				endDateArb, // endDate (various values)
-				fc.array(fc.string(), { minLength: 0, maxLength: 3 }), // bullets
+				fc.array(fc.string(), { maxLength: 3, minLength: 0 }), // bullets
 				(company, title, startDate, endDate, bullets) => {
 					const experience: Record<string, unknown> = {
-						company,
-						title,
-						startDate,
-						current: true, // Always true for this property
 						bullets,
+						company,
+						current: true, // Always true for this property
+						startDate,
+						title,
 					}
 
 					// Only add endDate if it's defined
@@ -360,13 +366,15 @@ describe('Property 4: Current position endDate optionality', () => {
 
 	it('should also pass validation for non-current positions with various endDate values', () => {
 		// Arbitrary for valid non-empty strings (required fields)
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		// Arbitrary for various endDate values
 		const endDateArb = fc.oneof(
 			fc.constant(undefined),
 			fc.constant(''),
-			fc.string({ minLength: 1, maxLength: 20 }),
+			fc.string({ maxLength: 20, minLength: 1 }),
 		)
 
 		fc.assert(
@@ -378,9 +386,9 @@ describe('Property 4: Current position endDate optionality', () => {
 				(company, title, startDate, endDate) => {
 					const experience: Record<string, unknown> = {
 						company,
-						title,
-						startDate,
 						current: false, // Non-current position
+						startDate,
+						title,
 					}
 
 					if (endDate !== undefined) {
@@ -402,7 +410,6 @@ describe('Property 4: Current position endDate optionality', () => {
 	})
 })
 
-
 /**
  * Feature: resume-form-wizard-refactor, Property 6: Education required fields validation
  * Validates: Requirements 3.2
@@ -413,18 +420,20 @@ describe('Property 4: Current position endDate optionality', () => {
 describe('Property 6: Education required fields validation', () => {
 	it('should fail validation when any required education field is empty string', () => {
 		// Arbitrary for valid non-empty strings
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		// Test each required field being empty string (the only value that fails .min(1))
 		fc.assert(
 			fc.property(
 				validStringArb, // school
 				validStringArb, // degree
-				fc.integer({ min: 0, max: 1 }), // which field to make empty (0=school, 1=degree)
+				fc.integer({ max: 1, min: 0 }), // which field to make empty (0=school, 1=degree)
 				(school, degree, fieldToEmpty) => {
 					const education = {
-						school: fieldToEmpty === 0 ? '' : school,
 						degree: fieldToEmpty === 1 ? '' : degree,
+						school: fieldToEmpty === 0 ? '' : school,
 					}
 
 					const content = {
@@ -456,7 +465,9 @@ describe('Property 6: Education required fields validation', () => {
 
 	it('should pass validation when all required education fields are provided', () => {
 		// Arbitrary for valid non-empty strings
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		// Arbitrary for optional strings
 		const optionalStringArb = fc.oneof(fc.constant(undefined), fc.constant(''), validStringArb)
@@ -470,8 +481,8 @@ describe('Property 6: Education required fields validation', () => {
 				optionalStringArb, // gpa (optional)
 				(school, degree, field, graduationDate, gpa) => {
 					const education: Record<string, unknown> = {
-						school,
 						degree,
+						school,
 					}
 
 					// Only add optional fields if defined
@@ -494,7 +505,6 @@ describe('Property 6: Education required fields validation', () => {
 	})
 })
 
-
 /**
  * Feature: resume-form-wizard-refactor, Property 7: Project required fields validation
  * Validates: Requirements 4.2
@@ -508,13 +518,13 @@ describe('Property 7: Project required fields validation', () => {
 		const optionalStringArb = fc.oneof(
 			fc.constant(undefined),
 			fc.constant(''),
-			fc.string({ minLength: 1, maxLength: 100 }),
+			fc.string({ maxLength: 100, minLength: 1 }),
 		)
 
 		// Arbitrary for technologies array
-		const technologiesArb = fc.array(fc.string({ minLength: 1, maxLength: 30 }), {
-			minLength: 0,
+		const technologiesArb = fc.array(fc.string({ maxLength: 30, minLength: 1 }), {
 			maxLength: 5,
+			minLength: 0,
 		})
 
 		fc.assert(
@@ -559,19 +569,21 @@ describe('Property 7: Project required fields validation', () => {
 
 	it('should pass validation when project name is provided', () => {
 		// Arbitrary for valid non-empty strings (required name field)
-		const validNameArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validNameArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		// Arbitrary for optional strings
 		const optionalStringArb = fc.oneof(
 			fc.constant(undefined),
 			fc.constant(''),
-			fc.string({ minLength: 1, maxLength: 100 }),
+			fc.string({ maxLength: 100, minLength: 1 }),
 		)
 
 		// Arbitrary for technologies array
-		const technologiesArb = fc.array(fc.string({ minLength: 1, maxLength: 30 }), {
-			minLength: 0,
+		const technologiesArb = fc.array(fc.string({ maxLength: 30, minLength: 1 }), {
 			maxLength: 5,
+			minLength: 0,
 		})
 
 		fc.assert(
@@ -610,7 +622,6 @@ describe('Property 7: Project required fields validation', () => {
 	})
 })
 
-
 /**
  * Feature: resume-form-wizard-refactor, Property 2: Required field validation
  * Validates: Requirements 1.5
@@ -627,20 +638,24 @@ describe('Property 2: Required field validation', () => {
 		// Arbitrary for empty or whitespace-only strings
 		const emptyOrWhitespaceArb = fc.oneof(
 			fc.constant(''),
-			fc.integer({ min: 1, max: 10 }).map((n) => ' '.repeat(n)), // whitespace only (spaces)
-			fc.integer({ min: 1, max: 5 }).map((n) => '\t'.repeat(n)), // whitespace only (tabs)
+			fc
+				.integer({ max: 10, min: 1 })
+				.map((n) => ' '.repeat(n)), // whitespace only (spaces)
+			fc
+				.integer({ max: 5, min: 1 })
+				.map((n) => '\t'.repeat(n)), // whitespace only (tabs)
 		)
 
 		fc.assert(
 			fc.property(emptyOrWhitespaceArb, (title) => {
 				const formData = {
-					title,
 					content: {
-						experience: [],
 						education: [],
+						experience: [],
 						projects: [],
 						skills: { soft: [], technical: [] },
 					},
+					title,
 				}
 
 				const result = createResumeSchema.safeParse(formData)
@@ -666,19 +681,19 @@ describe('Property 2: Required field validation', () => {
 	it('should pass validation when title is a valid non-empty string', () => {
 		// Arbitrary for valid non-empty, non-whitespace-only strings
 		const validTitleArb = fc
-			.string({ minLength: 1, maxLength: 100 })
+			.string({ maxLength: 100, minLength: 1 })
 			.filter((s) => s.trim().length > 0)
 
 		fc.assert(
 			fc.property(validTitleArb, (title) => {
 				const formData = {
-					title,
 					content: {
-						experience: [],
 						education: [],
+						experience: [],
 						projects: [],
 						skills: { soft: [], technical: [] },
 					},
+					title,
 				}
 
 				const result = createResumeSchema.safeParse(formData)
@@ -706,8 +721,12 @@ describe('Property 2: Required field validation', () => {
 			fc.constant(undefined),
 			fc.constant(null),
 			fc.constant(''),
-			fc.integer({ min: 1, max: 5 }).map((n) => ' '.repeat(n)), // whitespace only
-			fc.string({ minLength: 1, maxLength: 100 }).filter((s) => s.trim().length > 0), // valid
+			fc
+				.integer({ max: 5, min: 1 })
+				.map((n) => ' '.repeat(n)), // whitespace only
+			fc
+				.string({ maxLength: 100, minLength: 1 })
+				.filter((s) => s.trim().length > 0), // valid
 		)
 
 		fc.assert(
@@ -726,7 +745,6 @@ describe('Property 2: Required field validation', () => {
 	})
 })
 
-
 /**
  * Feature: resume-form-wizard-refactor, Property 5: Array field persistence
  * Validates: Requirements 2.3, 3.3, 4.3
@@ -738,19 +756,21 @@ describe('Property 2: Required field validation', () => {
 describe('Property 5: Array field persistence', () => {
 	it('should persist all experience entries in the experience array', () => {
 		// Arbitrary for valid experience entries
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		const experienceArb = fc.record({
+			bullets: fc.array(fc.string(), { maxLength: 5, minLength: 0 }),
 			company: validStringArb,
-			title: validStringArb,
-			startDate: validStringArb,
-			endDate: fc.option(validStringArb, { nil: undefined }),
 			current: fc.boolean(),
 			description: fc.option(validStringArb, { nil: undefined }),
-			bullets: fc.array(fc.string(), { minLength: 0, maxLength: 5 }),
+			endDate: fc.option(validStringArb, { nil: undefined }),
+			startDate: validStringArb,
+			title: validStringArb,
 		})
 
-		const experiencesArb = fc.array(experienceArb, { minLength: 0, maxLength: 5 })
+		const experiencesArb = fc.array(experienceArb, { maxLength: 5, minLength: 0 })
 
 		fc.assert(
 			fc.property(experiencesArb, (experiences) => {
@@ -779,17 +799,19 @@ describe('Property 5: Array field persistence', () => {
 
 	it('should persist all education entries in the education array', () => {
 		// Arbitrary for valid education entries
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		const educationArb = fc.record({
-			school: validStringArb,
 			degree: validStringArb,
 			field: fc.option(validStringArb, { nil: undefined }),
-			graduationDate: fc.option(validStringArb, { nil: undefined }),
 			gpa: fc.option(validStringArb, { nil: undefined }),
+			graduationDate: fc.option(validStringArb, { nil: undefined }),
+			school: validStringArb,
 		})
 
-		const educationsArb = fc.array(educationArb, { minLength: 0, maxLength: 5 })
+		const educationsArb = fc.array(educationArb, { maxLength: 5, minLength: 0 })
 
 		fc.assert(
 			fc.property(educationsArb, (educations) => {
@@ -817,16 +839,21 @@ describe('Property 5: Array field persistence', () => {
 
 	it('should persist all project entries in the projects array', () => {
 		// Arbitrary for valid project entries
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		const projectArb = fc.record({
-			name: validStringArb,
 			description: fc.option(validStringArb, { nil: undefined }),
+			name: validStringArb,
+			technologies: fc.array(fc.string({ maxLength: 30, minLength: 1 }), {
+				maxLength: 5,
+				minLength: 0,
+			}),
 			url: fc.option(validStringArb, { nil: undefined }),
-			technologies: fc.array(fc.string({ minLength: 1, maxLength: 30 }), { minLength: 0, maxLength: 5 }),
 		})
 
-		const projectsArb = fc.array(projectArb, { minLength: 0, maxLength: 5 })
+		const projectsArb = fc.array(projectArb, { maxLength: 5, minLength: 0 })
 
 		fc.assert(
 			fc.property(projectsArb, (projects) => {
@@ -853,35 +880,40 @@ describe('Property 5: Array field persistence', () => {
 
 	it('should persist all array fields together in a complete resume content', () => {
 		// Arbitrary for valid entries
-		const validStringArb = fc.string({ minLength: 1, maxLength: 50 }).filter((s) => s.trim().length > 0)
+		const validStringArb = fc
+			.string({ maxLength: 50, minLength: 1 })
+			.filter((s) => s.trim().length > 0)
 
 		const experienceArb = fc.record({
+			bullets: fc.array(fc.string(), { maxLength: 3, minLength: 0 }),
 			company: validStringArb,
-			title: validStringArb,
-			startDate: validStringArb,
 			current: fc.boolean(),
-			bullets: fc.array(fc.string(), { minLength: 0, maxLength: 3 }),
+			startDate: validStringArb,
+			title: validStringArb,
 		})
 
 		const educationArb = fc.record({
-			school: validStringArb,
 			degree: validStringArb,
+			school: validStringArb,
 		})
 
 		const projectArb = fc.record({
 			name: validStringArb,
-			technologies: fc.array(fc.string({ minLength: 1, maxLength: 20 }), { minLength: 0, maxLength: 3 }),
+			technologies: fc.array(fc.string({ maxLength: 20, minLength: 1 }), {
+				maxLength: 3,
+				minLength: 0,
+			}),
 		})
 
 		fc.assert(
 			fc.property(
-				fc.array(experienceArb, { minLength: 0, maxLength: 3 }),
-				fc.array(educationArb, { minLength: 0, maxLength: 3 }),
-				fc.array(projectArb, { minLength: 0, maxLength: 3 }),
+				fc.array(experienceArb, { maxLength: 3, minLength: 0 }),
+				fc.array(educationArb, { maxLength: 3, minLength: 0 }),
+				fc.array(projectArb, { maxLength: 3, minLength: 0 }),
 				(experiences, educations, projects) => {
 					const content = {
-						experience: experiences,
 						education: educations,
+						experience: experiences,
 						projects: projects,
 					}
 
