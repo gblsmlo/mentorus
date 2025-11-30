@@ -1,5 +1,7 @@
 export * from './schemas/account'
+export * from './schemas/application'
 export * from './schemas/job'
+export * from './schemas/relations'
 export * from './schemas/resume'
 export * from './schemas/resume-version'
 export * from './schemas/scan'

@@ -32,9 +32,10 @@ interface ResumeFormProps {
 		title: string
 		content: ResumeContent
 	}
+	onSave?: (data: { title: string; content: ResumeContent }) => Promise<void>
 }
 
-export function ResumeForm({ userId, resumeId, initialData }: ResumeFormProps) {
+export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeFormProps) {
 	const router = useRouter()
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [commitMessage, setCommitMessage] = useState('')
@@ -70,6 +71,11 @@ export function ResumeForm({ userId, resumeId, initialData }: ResumeFormProps) {
 	async function onSubmit(data: { title: string; content: ResumeContent }) {
 		setIsSubmitting(true)
 		try {
+			if (onSave) {
+				await onSave(data)
+				return
+			}
+
 			if (resumeId) {
 				// Update existing resume (creates new version)
 				await updateResume(userId, {
