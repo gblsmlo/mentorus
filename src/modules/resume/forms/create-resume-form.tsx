@@ -7,9 +7,10 @@ import type { WizardStep } from '@modules/ats-analyzer/types/wizard-types'
 import { isFailure, isSuccess } from '@shared/errors/result'
 import { sleep } from '@utils/sleep'
 import { useRouter } from 'next/navigation'
-import { useMemo, useTransition } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { autoSaveResumeAction } from '../actions/auto-save-resume-action'
 import { createResumeAction } from '../actions/create-resume-action'
 import { EducationSection } from '../components/education-section'
 import { ExperienceSection } from '../components/experience-section'
@@ -17,7 +18,16 @@ import { ProjectsSection } from '../components/projects-section'
 import { ResumeInfoSection } from '../components/resume-info-section'
 import { SkillsSection } from '../components/skills-section'
 import { WizardWrapper } from '../components/wizard-wrapper'
-import { type CreateResumeData, createResumeSchema, type ResumeContent } from '../schemas'
+import {
+	type CreateResumeData,
+	createResumeSchema,
+	type ResumeContent,
+	step1Schema,
+	step2Schema,
+	step3Schema,
+	step4Schema,
+	step5Schema,
+} from '../schemas'
 
 interface CreateResumeFormProps {
 	userId: string
@@ -31,6 +41,8 @@ interface CreateResumeFormProps {
 export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResumeFormProps) {
 	const router = useRouter()
 	const [isPending, startTransition] = useTransition()
+	const [resumeId, setResumeId] = useState<string | null>(null)
+	const [isAutoSaving, setIsAutoSaving] = useState(false)
 
 	const form = useForm({
 		defaultValues: initialData || {
@@ -84,18 +96,77 @@ export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResum
 		[form.control],
 	)
 
-	// Check if current step can advance (all required fields valid)
-	const canAdvance = useMemo(() => {
-		const errors = form.formState.errors
-		const headline = form.getValues('content.headline')
+	// Validate each step independently
+	const canAdvanceFromStep = (currentStep: number): boolean => {
+		const formValues = form.getValues('content')
 
-		// Step 1: Only require headline
-		if (!headline || headline.trim() === '') return false
-		if (errors.content?.headline) return false
+		switch (currentStep) {
+			case 0: // Step 1 - Info
+				return step1Schema.safeParse(formValues).success
 
-		// All other required validations are handled by the schema
-		return true
-	}, [form.formState.errors, form])
+			case 1: {
+				// Step 2 - Experience
+				const experiences = formValues.experience || []
+				// Allow empty array or valid experiences
+				if (experiences.length === 0) return true
+				return step2Schema.safeParse({ experience: experiences }).success
+			}
+
+			case 2: {
+				// Step 3 - Education
+				const education = formValues.education || []
+				// Allow empty array or valid education
+				if (education.length === 0) return true
+				return step3Schema.safeParse({ education }).success
+			}
+
+			case 3: {
+				// Step 4 - Projects
+				const projects = formValues.projects || []
+				// Allow empty array or valid projects
+				if (projects.length === 0) return true
+				return step4Schema.safeParse({ projects }).success
+			}
+
+			case 4: // Step 5 - Skills (always valid, all optional)
+				return true
+
+			default:
+				return true
+		}
+	}
+
+	// Auto-save when navigating between steps
+	const handleStepChange = async (newStep: number, oldStep: number) => {
+		// Only save when advancing (not when going back)
+		if (newStep <= oldStep) return
+
+		setIsAutoSaving(true)
+
+		try {
+			const content = form.getValues('content')
+			const result = await autoSaveResumeAction(userId, {
+				content,
+				resumeId: resumeId || undefined,
+			})
+
+			if (isSuccess(result)) {
+				// Save resumeId after first creation
+				if (!resumeId) {
+					setResumeId(result.data.resumeId)
+				}
+				toast.success('Progresso salvo automaticamente')
+			} else if (isFailure(result)) {
+				toast.error('Erro ao salvar', {
+					description: result.message,
+				})
+			}
+		} catch (error) {
+			console.error('Auto-save error:', error)
+		} finally {
+			setIsAutoSaving(false)
+		}
+	}
 
 	const handleSubmit = (formData: CreateResumeData) => {
 		form.clearErrors()
@@ -145,10 +216,11 @@ export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResum
 				)}
 
 				<WizardWrapper
-					canAdvance={canAdvance}
-					isSubmitting={isSubmitPending}
+					canAdvanceFromStep={canAdvanceFromStep}
+					isSubmitting={isSubmitPending || isAutoSaving}
 					onBack={() => router.back()}
 					onComplete={handleComplete}
+					onStepChange={handleStepChange}
 					steps={wizardSteps}
 					storageKey={`resume-draft-${userId}`}
 					submitLabel="Criar Resume"

@@ -1,4 +1,4 @@
-import { jsonb, pgTable, text } from 'drizzle-orm/pg-core'
+import { pgTable, text } from 'drizzle-orm/pg-core'
 import { uuidv7 } from 'uuidv7'
 import { auditFields } from '../helpers'
 import { user } from './user'
@@ -10,6 +10,7 @@ export const resume = pgTable('resume', {
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => uuidv7()),
+	status: text('status').notNull().default('draft'),
 	summary: text('summary'),
 	userId: text('user_id')
 		.notNull()

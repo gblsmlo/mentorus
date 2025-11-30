@@ -4,9 +4,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { format } from 'date-fns'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { getResumeHistory, restoreVersion } from '../actions/resume-actions'
+import { getResumeHistoryAction } from '../actions/get-resume-actions'
+import { restoreVersionAction } from '../actions/restore-version-action'
 
 interface Version {
 	id: string
@@ -25,20 +26,20 @@ export function VersionHistory({ userId, resumeId }: VersionHistoryProps) {
 	const [loading, setLoading] = useState(true)
 	const [restoring, setRestoring] = useState<string | null>(null)
 
-	useEffect(() => {
-		loadVersions()
-	}, [])
-
-	async function loadVersions() {
+	const loadVersions = useCallback(async () => {
 		try {
-			const data = await getResumeHistory(userId, resumeId)
+			const data = await getResumeHistoryAction(userId, resumeId)
 			setVersions(data as Version[])
-		} catch (error) {
+		} catch {
 			toast.error('Failed to load version history')
 		} finally {
 			setLoading(false)
 		}
-	}
+	}, [userId, resumeId])
+
+	useEffect(() => {
+		loadVersions()
+	}, [loadVersions])
 
 	async function handleRestore(versionId: string, versionNumber: number) {
 		const confirmMsg = `Restore to version ${versionNumber}? This will create a new version with the content from v${versionNumber}.`
@@ -52,7 +53,7 @@ export function VersionHistory({ userId, resumeId }: VersionHistoryProps) {
 				return
 			}
 
-			await restoreVersion(userId, {
+			await restoreVersionAction(userId, {
 				commitMessage,
 				resumeId,
 				sourceVersionId: versionId,
@@ -60,7 +61,7 @@ export function VersionHistory({ userId, resumeId }: VersionHistoryProps) {
 
 			toast.success('Version restored successfully!')
 			loadVersions() // Reload to show new version
-		} catch (error) {
+		} catch {
 			toast.error('Failed to restore version')
 		} finally {
 			setRestoring(null)

@@ -55,10 +55,71 @@ export const resumeContentSchema = z.object({
 
 export type ResumeContent = z.infer<typeof resumeContentSchema>
 
-// Step 1 Schema - Only headline is required
+// Step 1 validation - only headline required
 export const step1Schema = z.object({
 	competencies: z.array(z.string()).optional().default([]),
 	headline: z.string().min(1, 'Headline is required'),
+	summary: z.string().optional(),
+})
+
+// Step 2 validation - Experience (all optional if array is empty)
+export const step2Schema = z.object({
+	experience: z
+		.array(
+			z.object({
+				bullets: z.array(z.string()).optional().default([]),
+				company: z.string().min(1, 'Company is required'),
+				current: z.boolean().optional().default(false),
+				description: z.string().optional(),
+				endDate: z.string().optional(),
+				startDate: z.string().min(1, 'Start date is required'),
+				title: z.string().min(1, 'Job title is required'),
+			}),
+		)
+		.optional()
+		.default([]),
+})
+
+// Step 3 validation - Education (all optional if array is empty)
+export const step3Schema = z.object({
+	education: z
+		.array(
+			z.object({
+				degree: z.string().min(1, 'Degree is required'),
+				field: z.string().optional(),
+				gpa: z.string().optional(),
+				graduationDate: z.string().optional(),
+				school: z.string().min(1, 'School is required'),
+			}),
+		)
+		.optional()
+		.default([]),
+})
+
+// Step 4 validation - Projects (all optional)
+export const step4Schema = z.object({
+	projects: z
+		.array(
+			z.object({
+				description: z.string().optional(),
+				name: z.string().min(1, 'Project name is required'),
+				technologies: z.array(z.string()).optional().default([]),
+				url: z.string().optional(),
+			}),
+		)
+		.optional()
+		.default([]),
+})
+
+// Step 5 validation - Skills (all optional)
+export const step5Schema = z.object({
+	skills: z
+		.object({
+			soft: z.array(z.string()).optional().default([]),
+			technical: z.array(z.string()).optional().default([]),
+		})
+		.optional()
+		.default({ soft: [], technical: [] }),
 })
 
 export type Step1Data = z.infer<typeof step1Schema>

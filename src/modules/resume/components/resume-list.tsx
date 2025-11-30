@@ -2,20 +2,27 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { formatDistanceToNow } from 'date-fns'
+import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { MoreHorizontal, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { duplicateResumeAction } from '../actions/duplicate-resume-action'
+import { ResumeListEmpty } from './resume-list-empty'
 
 interface Resume {
 	id: string
 	headline: string
 	currentVersionId: string | null
-	createdAt: Date
-	updatedAt: Date
 }
 
 interface ResumeListProps {
@@ -32,6 +39,7 @@ export function ResumeList({ resumes, userId }: ResumeListProps) {
 		if (!newHeadline) return
 
 		setDuplicating(resumeId)
+
 		try {
 			await duplicateResumeAction(resumeId, newHeadline)
 			toast.success('Resume duplicated successfully!')
@@ -46,58 +54,58 @@ export function ResumeList({ resumes, userId }: ResumeListProps) {
 	}
 
 	if (resumes.length === 0) {
-		return (
-			<Card>
-				<CardContent className="flex flex-col items-center justify-center py-12">
-					<div className="space-y-4 text-center">
-						<div>
-							<h3 className="font-semibold text-lg">No resumes yet</h3>
-							<p className="text-muted-foreground text-sm">
-								Create your first resume to get started with ATS analysis
-							</p>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
-		)
+		return <ResumeListEmpty />
 	}
 
 	return (
 		<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{resumes.map((resume) => (
-				<Card className="transition-shadow hover:shadow-lg" key={resume.id}>
-					<CardHeader>
-						<div className="flex items-start justify-between">
-							<div className="flex-1">
-								<CardTitle className="line-clamp-1">{resume.headline}</CardTitle>
-								<CardDescription>
-									Updated {formatDistanceToNow(new Date(resume.updatedAt), { addSuffix: true })}
-								</CardDescription>
+				<Link href={`/resumes/${resume.id}`} key={resume.id}>
+					<Card className="transition-shadow hover:shadow-lg hover:outline-1" key={resume.id}>
+						<CardHeader className="relative gap-4">
+							<div className="flex items-start justify-between">
+								<div className="flex-1">
+									<CardTitle className="line-clamp-1">{resume.headline}</CardTitle>
+								</div>
 							</div>
+							<div className="absolute top-0 right-4">
+								<DropdownMenu>
+									<DropdownMenuTrigger asChild>
+										<Button size="icon" variant="outline">
+											<MoreHorizontal className="size-4" />
+										</Button>
+									</DropdownMenuTrigger>
+									<DropdownMenuContent align="start" className="w-56">
+										<DropdownMenuItem>
+											<Link href={`/resumes/${resume.id}/analyze`}>Analyze</Link>
+										</DropdownMenuItem>
+										<DropdownMenuSeparator />
+										<DropdownMenuGroup>
+											<DropdownMenuItem>
+												<Link href={`/resumes/${resume.id}`}>Open</Link>
+											</DropdownMenuItem>
+											<DropdownMenuItem>
+												<Link href={`/resumes/${resume.id}/edit`}>Edit</Link>
+											</DropdownMenuItem>
+											<DropdownMenuItem onClick={() => handleDuplicate(resume.id, resume.headline)}>
+												Duplicate
+											</DropdownMenuItem>
+										</DropdownMenuGroup>
+										<DropdownMenuSeparator />
+										<DropdownMenuItem variant="destructive">
+											<Trash2 size={16} />
+											Delete
+										</DropdownMenuItem>
+									</DropdownMenuContent>
+								</DropdownMenu>
+							</div>
+						</CardHeader>
+
+						<CardFooter className="flex">
 							{resume.currentVersionId && <Badge variant="secondary">Active</Badge>}
-						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="flex flex-col gap-2">
-							<div className="flex gap-2">
-								<Button asChild className="flex-1" size="sm" variant="default">
-									<Link href={`/resumes/${resume.id}`}>Edit</Link>
-								</Button>
-								<Button asChild className="flex-1" size="sm" variant="outline">
-									<Link href={`/resumes/${resume.id}/analyze`}>Analyze</Link>
-								</Button>
-							</div>
-							<Button
-								disabled={duplicating === resume.id}
-								onClick={() => handleDuplicate(resume.id, resume.headline)}
-								size="sm"
-								variant="ghost"
-							>
-								{duplicating === resume.id ? 'Duplicating...' : '📋 Duplicate'}
-							</Button>
-						</div>
-					</CardContent>
-				</Card>
+						</CardFooter>
+					</Card>
+				</Link>
 			))}
 		</div>
 	)

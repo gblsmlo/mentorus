@@ -2,9 +2,9 @@
 
 import { Button } from '@/components/ui/button'
 import { Stepper } from '@/components/ui/stepper'
+import type { Step, WizardStep } from '@modules/ats-analyzer/types/wizard-types'
 import { IconArrowLeft, IconArrowRight } from '@tabler/icons-react'
 import { useEffect, useState } from 'react'
-import type { Step, WizardStep } from '../types/wizard-types'
 
 interface WizardWrapperProps {
 	steps: WizardStep[]
@@ -12,7 +12,10 @@ interface WizardWrapperProps {
 	onComplete: () => void
 	onBack?: () => void
 	storageKey: string
-	canAdvance: boolean // From parent form validation
+	// New: Dynamic validation per step
+	canAdvanceFromStep?: (currentStep: number) => boolean
+	// New: Callback when step changes (for auto-save)
+	onStepChange?: (newStep: number, oldStep: number) => Promise<void>
 	isSubmitting?: boolean
 	submitLabel?: string
 }
@@ -23,12 +26,14 @@ export function WizardWrapper({
 	onComplete,
 	onBack,
 	storageKey,
-	canAdvance,
+	canAdvanceFromStep,
+	onStepChange,
 	isSubmitting = false,
 	submitLabel = 'Submit',
 }: WizardWrapperProps) {
 	const [currentStep, setCurrentStep] = useState(initialStep)
 	const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
+	const [isChangingStep, setIsChangingStep] = useState(false)
 
 	const isFirstStep = currentStep === 0
 	const isLastStep = currentStep === steps.length - 1
@@ -70,11 +75,28 @@ export function WizardWrapper({
 		}
 	}, [storageKey])
 
-	const handleNext = () => {
-		if (!canAdvance || isLastStep) return
+	const handleNext = async () => {
+		const canAdvance = canAdvanceFromStep ? canAdvanceFromStep(currentStep) : true
+		if (!canAdvance || isLastStep || isChangingStep) return
+
+		setIsChangingStep(true)
+		const oldStep = currentStep
+		const newStep = currentStep + 1
+
+		// Call onStepChange if provided (for auto-save)
+		if (onStepChange) {
+			try {
+				await onStepChange(newStep, oldStep)
+			} catch (error) {
+				console.error('Error in onStepChange:', error)
+				setIsChangingStep(false)
+				return
+			}
+		}
 
 		setCompletedSteps((prev) => new Set(prev).add(currentStep))
-		setCurrentStep((prev) => prev + 1)
+		setCurrentStep(newStep)
+		setIsChangingStep(false)
 	}
 
 	const handlePrevious = () => {
@@ -91,6 +113,7 @@ export function WizardWrapper({
 	}
 
 	const handleComplete = () => {
+		const canAdvance = canAdvanceFromStep ? canAdvanceFromStep(currentStep) : true
 		if (!canAdvance) return
 
 		// Mark final step as completed
@@ -121,14 +144,26 @@ export function WizardWrapper({
 				</Button>
 
 				{isLastStep ? (
-					<Button disabled={!canAdvance || isSubmitting} onClick={handleComplete} type="submit">
+					<Button
+						disabled={
+							!(canAdvanceFromStep ? canAdvanceFromStep(currentStep) : true) || isSubmitting
+						}
+						onClick={handleComplete}
+						type="submit"
+					>
 						{isSubmitting ? 'Saving...' : submitLabel}
 						{!isSubmitting && <IconArrowRight className="ml-2 h-4 w-4" />}
 					</Button>
 				) : (
-					<Button disabled={!canAdvance} onClick={handleNext} type="button">
-						Next
-						<IconArrowRight className="ml-2 h-4 w-4" />
+					<Button
+						disabled={
+							!(canAdvanceFromStep ? canAdvanceFromStep(currentStep) : true) || isChangingStep
+						}
+						onClick={handleNext}
+						type="button"
+					>
+						{isChangingStep ? 'Saving...' : 'Next'}
+						{!isChangingStep && <IconArrowRight className="ml-2 h-4 w-4" />}
 					</Button>
 				)}
 			</div>

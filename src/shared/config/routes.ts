@@ -37,14 +37,24 @@ export const mainRoutes: Route[] = [
 		link: '/dashboard',
 	},
 	{
+		icon: FileText,
+		label: 'Applications',
+		link: '/dashboard/applications',
+	},
+	{
+		icon: FileText,
+		label: 'Resumes',
+		link: '/dashboard/resumes',
+	},
+	{
+		icon: FileText,
+		label: 'Jobs',
+		link: '/dashboard/jobs',
+	},
+	{
 		icon: PieChart,
 		label: 'Analytics',
 		link: '/dashboard/analytics',
-	},
-	{
-		icon: Folder,
-		label: 'Projects',
-		link: '/dashboard/projects',
 	},
 	{
 		icon: Users,
