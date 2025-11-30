@@ -1,11 +1,11 @@
 services:
   db:
     image: bitnami/postgresql:latest
-    container_name: twincan_db
+    container_name: mentorus_db
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
-      POSTGRES_DB: twincan_db
+      POSTGRES_DB: mentorus_db
     ports:
       - "5432:5432"
     volumes:
