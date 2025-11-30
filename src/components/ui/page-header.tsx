@@ -11,3 +11,15 @@ export function PageTitle({ children }: { children: ReactNode }) {
 export function PageDescription({ children }: { children: ReactNode }) {
 	return <p className="text-base text-muted-foreground">{children}</p>
 }
+
+export function PageHeaderWithCTA({ children }: { children: ReactNode }) {
+	return <header className="flex items-center justify-between">{children}</header>
+}
+
+export function PageHeaderLeft({ children }: { children: ReactNode }) {
+	return <header className="flex flex-col gap-0.5">{children}</header>
+}
+
+export function PageHeaderRight({ children }: { children: ReactNode }) {
+	return <header className="flex flex-col justify-end gap-0.5">{children}</header>
+}

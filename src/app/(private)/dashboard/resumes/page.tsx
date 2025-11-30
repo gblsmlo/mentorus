@@ -1,6 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { MainContent } from '@/components/ui/main-content'
-import { PageDescription, PageHeader, PageTitle } from '@/components/ui/page-header'
+import {
+	PageDescription,
+	PageHeader,
+	PageHeaderLeft,
+	PageHeaderRight,
+	PageHeaderWithCTA,
+	PageTitle,
+} from '@/components/ui/page-header'
 import { getSessionAction } from '@/modules/auth'
 import { getUserResumesAction, ResumeList } from '@/modules/resume'
 import type { Metadata } from 'next'
@@ -23,15 +30,19 @@ export default async function ResumesPage() {
 
 	return (
 		<MainContent size="2xl">
-			<div className="flex items-center justify-between">
-				<PageHeader>
-					<PageTitle>My Resumes</PageTitle>
-					<PageDescription>Create and manage your resumes with version control</PageDescription>
-				</PageHeader>
-				<Button asChild>
-					<Link href="/dashboard/resumes/new">New Resume</Link>
-				</Button>
-			</div>
+			<PageHeaderWithCTA>
+				<PageHeaderLeft>
+					<PageHeader>
+						<PageTitle>My Resumes</PageTitle>
+						<PageDescription>Create and manage your resumes with version control</PageDescription>
+					</PageHeader>
+				</PageHeaderLeft>
+				<PageHeaderRight>
+					<Button asChild>
+						<Link href="/dashboard/resumes/new">New Resume</Link>
+					</Button>
+				</PageHeaderRight>
+			</PageHeaderWithCTA>
 
 			<ResumeList resumes={resumes} userId={session.user.id} />
 		</MainContent>
