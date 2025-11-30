@@ -12,17 +12,11 @@ import {
 } from '../schemas'
 import { getUserProfile } from './profile-actions'
 
-/**
- * Create a new resume with initial version (v1)
- * Automatically seeds with data from Master Profile to prevent re-entry
- */
 export async function createResume(userId: string, data: unknown) {
 	const validated = createResumeSchema.parse(data)
 
-	// Get user's master profile to seed personal info
 	const masterProfile = await getUserProfile(userId)
 
-	// Merge master profile data with provided content
 	const seededContent = {
 		...validated.content,
 		education:

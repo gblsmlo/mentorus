@@ -1,11 +1,10 @@
 import { MainContent } from '@/components/ui/main-content'
 import { PageDescription, PageHeader, PageTitle } from '@/components/ui/page-header'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { getResume } from '@/modules/ats-analyzer/actions/resume-actions'
-import { ResumeForm } from '@/modules/ats-analyzer/components/resume-form'
-import { VersionHistory } from '@/modules/ats-analyzer/components/version-history'
-import type { ResumeContent } from '@/modules/ats-analyzer/schemas'
 import { getSessionAction } from '@/modules/auth'
+import type { ResumeContent } from '@/modules/resume'
+import { getResumeAction, UpdateResumeForm } from '@/modules/resume'
+import { VersionHistory } from '@/modules/resume/components/version-history'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -21,7 +20,11 @@ export default async function EditResumePage({ params }: { params: Promise<{ id:
 	}
 
 	const { id } = await params
-	const resume = await getResume(session.user.id, id)
+	const resume = await getResumeAction(session.user.id, id)
+
+	if (!resume) {
+		redirect('/dashboard/resumes')
+	}
 
 	return (
 		<MainContent size="xl">
@@ -37,7 +40,7 @@ export default async function EditResumePage({ params }: { params: Promise<{ id:
 				</TabsList>
 
 				<TabsContent className="mt-6" value="edit">
-					<ResumeForm
+					<UpdateResumeForm
 						initialData={{
 							content: (resume.currentVersion?.content || {}) as ResumeContent,
 							title: resume.title,

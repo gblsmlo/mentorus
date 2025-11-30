@@ -5,9 +5,6 @@ import { userProfile } from '@/infra/db/schemas'
 import { eq } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 
-/**
- * Get user's master profile
- */
 export async function getUserProfile(userId: string) {
 	const profile = await db.query.userProfile.findFirst({
 		where: eq(userProfile.userId, userId),
@@ -16,10 +13,6 @@ export async function getUserProfile(userId: string) {
 	return profile
 }
 
-/**
- * Create or update user's master profile
- * This is the single source of truth for user's static data
- */
 export async function upsertUserProfile(
 	userId: string,
 	data: {
@@ -47,11 +40,9 @@ export async function upsertUserProfile(
 		}
 	},
 ) {
-	// Check if profile exists
 	const existing = await getUserProfile(userId)
 
 	if (existing) {
-		// Update existing profile
 		const [updated] = await db
 			.update(userProfile)
 			.set({
@@ -85,16 +76,11 @@ export async function upsertUserProfile(
 	return created
 }
 
-/**
- * Check if user has completed their master profile
- * Used for onboarding flow
- */
 export async function hasCompletedProfile(userId: string): Promise<boolean> {
 	const profile = await getUserProfile(userId)
 
 	if (!profile) return false
 
-	// Check if minimum required fields are filled
 	const hasName = !!profile.personalInfo.name && profile.personalInfo.name.length > 0
 	const hasEmail = !!profile.personalInfo.email && profile.personalInfo.email.length > 0
 

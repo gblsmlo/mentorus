@@ -3,12 +3,12 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { duplicateResumeAction } from '@/modules/resume'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { duplicateResumeAction } from '../actions/duplicate-resume-action'
 
 interface Resume {
 	id: string

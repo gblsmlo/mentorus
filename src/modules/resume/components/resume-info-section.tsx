@@ -15,7 +15,7 @@ export function ResumeInfoSection({ control }: ResumeInfoSectionProps) {
 	return (
 		<div className="space-y-4">
 			<div className="space-y-1">
-				<h3 className="font-semibold text-base tracking-tight">Basic information</h3>
+				<h3 className="font-semibold text-base tracking-tight">Resume information</h3>
 			</div>
 			<Card>
 				<CardContent className="space-y-4">

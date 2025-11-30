@@ -1,9 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { MainContent } from '@/components/ui/main-content'
 import { PageDescription, PageHeader, PageTitle } from '@/components/ui/page-header'
-import { getUserResumes } from '@/modules/ats-analyzer/actions/resume-actions'
-import { ResumeList } from '@/modules/ats-analyzer/components/resume-list'
 import { getSessionAction } from '@/modules/auth'
+import { getUserResumesAction, ResumeList } from '@/modules/resume'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -20,7 +19,7 @@ export default async function ResumesPage() {
 		redirect('/auth/sign-in')
 	}
 
-	const resumes = await getUserResumes(session.user.id)
+	const resumes = await getUserResumesAction(session.user.id)
 
 	return (
 		<MainContent size="lg">

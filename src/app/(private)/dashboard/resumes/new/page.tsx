@@ -1,7 +1,7 @@
 import { MainContent } from '@/components/ui/main-content'
 import { PageDescription, PageHeader, PageTitle } from '@/components/ui/page-header'
-import { ResumeForm } from '@/modules/ats-analyzer/components/resume-form'
 import { getSessionAction } from '@/modules/auth'
+import { CreateResumeForm } from '@/modules/resume'
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -18,13 +18,13 @@ export default async function NewResumePage() {
 	}
 
 	return (
-		<MainContent size="lg">
+		<MainContent size="sm">
 			<PageHeader>
-				<PageTitle>Resume Information</PageTitle>
+				<PageTitle>Resume</PageTitle>
 				<PageDescription>Fill in your information to create a resume</PageDescription>
 			</PageHeader>
 
-			<ResumeForm userId={session.user.id} />
+			<CreateResumeForm userId={session.user.id} />
 		</MainContent>
 	)
 }
