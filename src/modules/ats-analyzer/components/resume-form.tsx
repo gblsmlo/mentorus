@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
 	Form,
@@ -11,19 +10,20 @@ import {
 	FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { createResume, updateResume } from '../actions/resume-actions'
 import { createResumeSchema, type ResumeContent } from '../schemas'
+import type { WizardStep } from '../types/wizard-types'
 import { EducationSection } from './form-sections/education-section'
 import { ExperienceSection } from './form-sections/experience-section'
 import { PersonalInfoSection } from './form-sections/personal-info-section'
 import { ProjectsSection } from './form-sections/projects-section'
 import { SkillsSection } from './form-sections/skills-section'
+import { WizardWrapper } from './wizard-wrapper'
 
 interface ResumeFormProps {
 	userId: string
@@ -65,8 +65,60 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 			},
 			title: '',
 		},
+		mode: 'onChange', // Enable real-time validation for step advancement
 		resolver: zodResolver(createResumeSchema),
 	})
+
+	// Define wizard steps
+	const wizardSteps: WizardStep[] = useMemo(
+		() => [
+			{
+				component: <PersonalInfoSection control={form.control} />,
+				id: 'personal',
+				label: 'Personal Info',
+				validationFields: ['content.personalInfo.name', 'content.personalInfo.email'],
+			},
+			{
+				component: <ExperienceSection control={form.control} />,
+				id: 'experience',
+				label: 'Experience',
+			},
+			{
+				component: <EducationSection control={form.control} />,
+				id: 'education',
+				label: 'Education',
+			},
+			{
+				component: <SkillsSection control={form.control} />,
+				id: 'skills',
+				label: 'Skills',
+			},
+			{
+				component: <ProjectsSection control={form.control} />,
+				id: 'projects',
+				label: 'Projects',
+			},
+		],
+		[form.control],
+	)
+
+	// Check if current step can advance (all required fields valid)
+	const canAdvance = useMemo(() => {
+		const errors = form.formState.errors
+		const title = form.getValues('title')
+
+		// Always require title
+		if (!title) return false
+		if (errors.title) return false
+
+		// For personal info step, check required fields
+		if (errors.content?.personalInfo?.name || errors.content?.personalInfo?.email) {
+			return false
+		}
+
+		// All other required validations are handled by the schema
+		return true
+	}, [form.formState.errors, form])
 
 	async function onSubmit(data: { title: string; content: ResumeContent }) {
 		setIsSubmitting(true)
@@ -90,7 +142,7 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 				// Create new resume
 				const result = await createResume(userId, data)
 				toast.success('Resume created successfully!')
-				router.push(`/resumes/${result.resumeId}`)
+				router.push(`/dashboard/resumes/${result.resumeId}`)
 			}
 		} catch (error) {
 			toast.error('Failed to save resume', {
@@ -101,9 +153,13 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 		}
 	}
 
+	const handleComplete = () => {
+		form.handleSubmit(onSubmit)()
+	}
+
 	return (
 		<Form {...form}>
-			<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+			<div className="space-y-6">
 				{/* Resume Title */}
 				<Card>
 					<CardHeader>
@@ -127,36 +183,16 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 					</CardContent>
 				</Card>
 
-				{/* Main Content Tabs */}
-				<Tabs className="w-full" defaultValue="personal">
-					<TabsList className="grid w-full grid-cols-5">
-						<TabsTrigger value="personal">Personal</TabsTrigger>
-						<TabsTrigger value="experience">Experience</TabsTrigger>
-						<TabsTrigger value="education">Education</TabsTrigger>
-						<TabsTrigger value="skills">Skills</TabsTrigger>
-						<TabsTrigger value="projects">Projects</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="personal">
-						<PersonalInfoSection control={form.control} />
-					</TabsContent>
-
-					<TabsContent value="experience">
-						<ExperienceSection control={form.control} />
-					</TabsContent>
-
-					<TabsContent value="education">
-						<EducationSection control={form.control} />
-					</TabsContent>
-
-					<TabsContent value="skills">
-						<SkillsSection control={form.control} />
-					</TabsContent>
-
-					<TabsContent value="projects">
-						<ProjectsSection control={form.control} />
-					</TabsContent>
-				</Tabs>
+				{/* Wizard Steps */}
+				<WizardWrapper
+					canAdvance={canAdvance}
+					isSubmitting={isSubmitting}
+					onBack={() => router.back()}
+					onComplete={handleComplete}
+					steps={wizardSteps}
+					storageKey={`resume-draft-${userId}${resumeId ? `-${resumeId}` : ''}`}
+					submitLabel={resumeId ? 'Save New Version' : 'Create Resume'}
+				/>
 
 				{/* Commit Message (only for updates) */}
 				{resumeId && (
@@ -176,22 +212,7 @@ export function ResumeForm({ userId, resumeId, initialData, onSave }: ResumeForm
 						</CardContent>
 					</Card>
 				)}
-
-				{/* Submit Button */}
-				<div className="flex justify-end gap-4">
-					<Button
-						disabled={isSubmitting}
-						onClick={() => router.back()}
-						type="button"
-						variant="outline"
-					>
-						Cancel
-					</Button>
-					<Button disabled={isSubmitting} type="submit">
-						{isSubmitting ? 'Saving...' : resumeId ? 'Save New Version' : 'Create Resume'}
-					</Button>
-				</div>
-			</form>
+			</div>
 		</Form>
 	)
 }
