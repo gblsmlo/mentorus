@@ -6,28 +6,37 @@ import type { ResumeContent } from '../schemas'
 export class ResumeRepository {
 	/**
 	 * Create a new resume with initial version (v1)
+	 * Note: In the normalized model, experiences/education/projects/skills are linked separately
 	 */
 	async create(
 		userId: string,
 		data: {
-			title: string
-			content: ResumeContent
+			headline: string
+			competencies?: string[]
+			summary?: string
 		},
 	) {
 		const [newResume] = await db
 			.insert(resume)
 			.values({
-				title: data.title,
+				competencies: data.competencies || [],
+				headline: data.headline,
+				summary: data.summary,
 				userId,
 			})
 			.returning()
 
-		// Create version 1
+		// Create version 1 with minimal content
+		// Actual experiences/education/projects/skills are now in normalized tables
 		const [version1] = await db
 			.insert(resumeVersion)
 			.values({
 				commitMessage: 'Initial version',
-				content: data.content,
+				content: {
+					competencies: data.competencies || [],
+					headline: data.headline,
+					summary: data.summary || '',
+				},
 				resumeId: newResume.id,
 				versionNumber: 1,
 			})
@@ -181,7 +190,7 @@ export class ResumeRepository {
 	/**
 	 * Duplicate an existing resume (deep copy)
 	 */
-	async duplicate(userId: string, sourceResumeId: string, newTitle: string) {
+	async duplicate(userId: string, sourceResumeId: string, newHeadline: string) {
 		// Verify ownership of source resume
 		const sourceResume = await db.query.resume.findFirst({
 			where: and(eq(resume.id, sourceResumeId), eq(resume.userId, userId)),
@@ -205,7 +214,9 @@ export class ResumeRepository {
 		const [newResume] = await db
 			.insert(resume)
 			.values({
-				title: newTitle,
+				competencies: sourceResume.competencies,
+				headline: newHeadline,
+				summary: sourceResume.summary,
 				userId,
 			})
 			.returning()
@@ -214,7 +225,7 @@ export class ResumeRepository {
 		const [version1] = await db
 			.insert(resumeVersion)
 			.values({
-				commitMessage: `Duplicated from "${sourceResume.title}"`,
+				commitMessage: `Duplicated from "${sourceResume.headline}"`,
 				content: latestVersion.content,
 				resumeId: newResume.id,
 				versionNumber: 1,

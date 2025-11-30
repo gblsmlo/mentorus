@@ -1,6 +1,5 @@
 'use server'
 
-import { getUserProfile } from '@modules/ats-analyzer/actions/profile-actions'
 import { handleAuthError } from '@shared/errors/error-handler'
 import { failure, type Result, success } from '@shared/errors/result'
 import { revalidatePath } from 'next/cache'
@@ -29,24 +28,12 @@ export const createResumeAction = async (
 	}
 
 	try {
-		const { title, content } = validatedFields.data
-
-		// Get user's master profile to seed personal info
-		const masterProfile = await getUserProfile(userId)
-
-		// Merge master profile data with provided content
-		const seededContent = {
-			...content,
-			education: content.education.length > 0 ? content.education : masterProfile?.education || [],
-			skills: {
-				soft: [...(masterProfile?.skills?.soft || []), ...content.skills.soft],
-				technical: [...(masterProfile?.skills?.technical || []), ...content.skills.technical],
-			},
-		}
+		const { content } = validatedFields.data
 
 		const result = await resumeRepository.create(userId, {
-			content: seededContent,
-			title,
+			competencies: content.competencies,
+			headline: content.headline,
+			summary: content.summary,
 		})
 
 		revalidatePath('/dashboard/resumes')

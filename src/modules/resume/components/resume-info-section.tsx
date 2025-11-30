@@ -24,7 +24,9 @@ export function ResumeInfoSection({ control }: ResumeInfoSectionProps) {
 						name="content.headline"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Headline</FormLabel>
+								<FormLabel>
+									Headline <span className="text-destructive">*</span>
+								</FormLabel>
 								<FormControl>
 									<Input placeholder="" {...field} />
 								</FormControl>
@@ -34,10 +36,10 @@ export function ResumeInfoSection({ control }: ResumeInfoSectionProps) {
 					/>
 					<FormField
 						control={control}
-						name="content.about"
+						name="content.summary"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>About</FormLabel>
+								<FormLabel>Summary</FormLabel>
 								<FormControl>
 									<Textarea className="min-h-[120px]" placeholder="" {...field} />
 								</FormControl>

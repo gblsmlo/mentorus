@@ -30,12 +30,12 @@ export function SkillsSection({ control }: SkillsSectionProps) {
 								<FormItem>
 									<FormControl>
 										<Input
-											placeholder="e.g., React, TypeScript, Node.js"
-											value={field.value?.join(', ') || ''}
 											onChange={(e) => {
 												const parsed = parseCommaSeparated(e.target.value)
 												field.onChange(parsed)
 											}}
+											placeholder="e.g., React, TypeScript, Node.js"
+											value={field.value?.join(', ') || ''}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -61,12 +61,12 @@ export function SkillsSection({ control }: SkillsSectionProps) {
 								<FormItem>
 									<FormControl>
 										<Input
-											placeholder="e.g., Leadership, Communication, Problem-solving"
-											value={field.value?.join(', ') || ''}
 											onChange={(e) => {
 												const parsed = parseCommaSeparated(e.target.value)
 												field.onChange(parsed)
 											}}
+											placeholder="e.g., Leadership, Communication, Problem-solving"
+											value={field.value?.join(', ') || ''}
 										/>
 									</FormControl>
 									<FormMessage />

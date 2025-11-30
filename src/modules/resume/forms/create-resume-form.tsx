@@ -35,7 +35,6 @@ export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResum
 	const form = useForm({
 		defaultValues: initialData || {
 			content: {
-				about: '',
 				competencies: [],
 				education: [],
 				experience: [],
@@ -47,7 +46,6 @@ export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResum
 				},
 				summary: '',
 			},
-			title: '',
 		},
 		mode: 'onChange',
 		resolver: zodResolver(createResumeSchema),
@@ -60,7 +58,7 @@ export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResum
 			{
 				component: <ResumeInfoSection control={form.control} />,
 				id: 'resume-info',
-				label: 'Resume Info',
+				label: 'Info',
 			},
 			{
 				component: <ExperienceSection control={form.control} />,
@@ -89,11 +87,11 @@ export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResum
 	// Check if current step can advance (all required fields valid)
 	const canAdvance = useMemo(() => {
 		const errors = form.formState.errors
-		const title = form.getValues('title')
+		const headline = form.getValues('content.headline')
 
-		// Always require title (validated in Step 1 - Resume Info)
-		if (!title || title.trim() === '') return false
-		if (errors.title) return false
+		// Step 1: Only require headline
+		if (!headline || headline.trim() === '') return false
+		if (errors.content?.headline) return false
 
 		// All other required validations are handled by the schema
 		return true
@@ -140,7 +138,6 @@ export function CreateResumeForm({ userId, initialData, onSuccess }: CreateResum
 	return (
 		<Form {...form}>
 			<div className="space-y-6">
-				{/* Root error display */}
 				{form.formState.errors.root && (
 					<Alert variant="destructive">
 						<AlertDescription>{form.formState.errors.root.message}</AlertDescription>

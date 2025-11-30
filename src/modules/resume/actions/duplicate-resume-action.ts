@@ -16,12 +16,14 @@ type DuplicateResumeOutput = {
  * Creates a new resume with content from the source resume's latest version
  */
 export const duplicateResumeAction = async (
-	userId: string,
 	sourceResumeId: string,
-	newTitle: string,
+	newHeadline: string,
 ): Promise<Result<DuplicateResumeOutput>> => {
+	// TODO: Get userId from session instead of passing as parameter
+	const userId = 'temp-user-id' // This will be replaced with proper session handling
+
 	try {
-		const result = await resumeRepository.duplicate(userId, sourceResumeId, newTitle)
+		const result = await resumeRepository.duplicate(userId, sourceResumeId, newHeadline)
 
 		if (!result) {
 			return failure({

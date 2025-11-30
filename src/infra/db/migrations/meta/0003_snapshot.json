@@ -12,9 +12,9 @@
 			"values": ["draft", "optimizing", "applied", "interviewing", "offer", "rejected"]
 		}
 	},
-	"id": "be726bbd-4288-447b-a83e-57930ef41f46",
+	"id": "26d62ed3-b9ed-4bb6-b635-12c3fa367280",
 	"policies": {},
-	"prevId": "47c9a605-8419-48c5-893a-9ace7c573e3f",
+	"prevId": "36bd2edc-b6a3-4569-8dc8-a5e6d6f68e6a",
 	"roles": {},
 	"schemas": {},
 	"sequences": {},
@@ -219,6 +219,176 @@
 			"schema": "",
 			"uniqueConstraints": {}
 		},
+		"public.education": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"default": "now()",
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"degree": {
+					"name": "degree",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"field": {
+					"name": "field",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"gpa": {
+					"name": "gpa",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"graduation_date": {
+					"name": "graduation_date",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"school": {
+					"name": "school",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"user_id": {
+					"name": "user_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"education_user_id_user_id_fk": {
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"name": "education_user_id_user_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "education",
+					"tableTo": "user"
+				}
+			},
+			"indexes": {},
+			"isRLSEnabled": false,
+			"name": "education",
+			"policies": {},
+			"schema": "",
+			"uniqueConstraints": {}
+		},
+		"public.experience": {
+			"checkConstraints": {},
+			"columns": {
+				"bullets": {
+					"default": "'[]'::jsonb",
+					"name": "bullets",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "jsonb"
+				},
+				"company": {
+					"name": "company",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"created_at": {
+					"default": "now()",
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"current": {
+					"default": false,
+					"name": "current",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "boolean"
+				},
+				"description": {
+					"name": "description",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"end_date": {
+					"name": "end_date",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"start_date": {
+					"name": "start_date",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"title": {
+					"name": "title",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"user_id": {
+					"name": "user_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"experience_user_id_user_id_fk": {
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"name": "experience_user_id_user_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "experience",
+					"tableTo": "user"
+				}
+			},
+			"indexes": {},
+			"isRLSEnabled": false,
+			"name": "experience",
+			"policies": {},
+			"schema": "",
+			"uniqueConstraints": {}
+		},
 		"public.job": {
 			"checkConstraints": {},
 			"columns": {
@@ -291,9 +461,89 @@
 			"schema": "",
 			"uniqueConstraints": {}
 		},
+		"public.project": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"default": "now()",
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"description": {
+					"name": "description",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"name": {
+					"name": "name",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"technologies": {
+					"default": "'[]'::jsonb",
+					"name": "technologies",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "jsonb"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"url": {
+					"name": "url",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"user_id": {
+					"name": "user_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"project_user_id_user_id_fk": {
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"name": "project_user_id_user_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "project",
+					"tableTo": "user"
+				}
+			},
+			"indexes": {},
+			"isRLSEnabled": false,
+			"name": "project",
+			"policies": {},
+			"schema": "",
+			"uniqueConstraints": {}
+		},
 		"public.resume": {
 			"checkConstraints": {},
 			"columns": {
+				"competencies": {
+					"default": "'{}'",
+					"name": "competencies",
+					"notNull": false,
+					"primaryKey": false,
+					"type": "text[]"
+				},
 				"created_at": {
 					"default": "now()",
 					"name": "created_at",
@@ -307,15 +557,21 @@
 					"primaryKey": false,
 					"type": "text"
 				},
+				"headline": {
+					"name": "headline",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
 				"id": {
 					"name": "id",
 					"notNull": true,
 					"primaryKey": true,
 					"type": "text"
 				},
-				"title": {
-					"name": "title",
-					"notNull": true,
+				"summary": {
+					"name": "summary",
+					"notNull": false,
 					"primaryKey": false,
 					"type": "text"
 				},
@@ -347,6 +603,286 @@
 			"indexes": {},
 			"isRLSEnabled": false,
 			"name": "resume",
+			"policies": {},
+			"schema": "",
+			"uniqueConstraints": {}
+		},
+		"public.resume_education": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"default": "now()",
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"education_id": {
+					"name": "education_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"order": {
+					"default": 0,
+					"name": "order",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"resume_id": {
+					"name": "resume_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"resume_education_education_id_education_id_fk": {
+					"columnsFrom": ["education_id"],
+					"columnsTo": ["id"],
+					"name": "resume_education_education_id_education_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "resume_education",
+					"tableTo": "education"
+				},
+				"resume_education_resume_id_resume_id_fk": {
+					"columnsFrom": ["resume_id"],
+					"columnsTo": ["id"],
+					"name": "resume_education_resume_id_resume_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "resume_education",
+					"tableTo": "resume"
+				}
+			},
+			"indexes": {},
+			"isRLSEnabled": false,
+			"name": "resume_education",
+			"policies": {},
+			"schema": "",
+			"uniqueConstraints": {}
+		},
+		"public.resume_experience": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"default": "now()",
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"experience_id": {
+					"name": "experience_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"id": {
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"order": {
+					"default": 0,
+					"name": "order",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"resume_id": {
+					"name": "resume_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"resume_experience_experience_id_experience_id_fk": {
+					"columnsFrom": ["experience_id"],
+					"columnsTo": ["id"],
+					"name": "resume_experience_experience_id_experience_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "resume_experience",
+					"tableTo": "experience"
+				},
+				"resume_experience_resume_id_resume_id_fk": {
+					"columnsFrom": ["resume_id"],
+					"columnsTo": ["id"],
+					"name": "resume_experience_resume_id_resume_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "resume_experience",
+					"tableTo": "resume"
+				}
+			},
+			"indexes": {},
+			"isRLSEnabled": false,
+			"name": "resume_experience",
+			"policies": {},
+			"schema": "",
+			"uniqueConstraints": {}
+		},
+		"public.resume_project": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"default": "now()",
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"id": {
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"order": {
+					"default": 0,
+					"name": "order",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"project_id": {
+					"name": "project_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"resume_id": {
+					"name": "resume_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"resume_project_project_id_project_id_fk": {
+					"columnsFrom": ["project_id"],
+					"columnsTo": ["id"],
+					"name": "resume_project_project_id_project_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "resume_project",
+					"tableTo": "project"
+				},
+				"resume_project_resume_id_resume_id_fk": {
+					"columnsFrom": ["resume_id"],
+					"columnsTo": ["id"],
+					"name": "resume_project_resume_id_resume_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "resume_project",
+					"tableTo": "resume"
+				}
+			},
+			"indexes": {},
+			"isRLSEnabled": false,
+			"name": "resume_project",
+			"policies": {},
+			"schema": "",
+			"uniqueConstraints": {}
+		},
+		"public.resume_skill": {
+			"checkConstraints": {},
+			"columns": {
+				"created_at": {
+					"default": "now()",
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"id": {
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"order": {
+					"default": 0,
+					"name": "order",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "integer"
+				},
+				"resume_id": {
+					"name": "resume_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"skill_id": {
+					"name": "skill_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"resume_skill_resume_id_resume_id_fk": {
+					"columnsFrom": ["resume_id"],
+					"columnsTo": ["id"],
+					"name": "resume_skill_resume_id_resume_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "resume_skill",
+					"tableTo": "resume"
+				},
+				"resume_skill_skill_id_skill_id_fk": {
+					"columnsFrom": ["skill_id"],
+					"columnsTo": ["id"],
+					"name": "resume_skill_skill_id_skill_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "resume_skill",
+					"tableTo": "skill"
+				}
+			},
+			"indexes": {},
+			"isRLSEnabled": false,
+			"name": "resume_skill",
 			"policies": {},
 			"schema": "",
 			"uniqueConstraints": {}
@@ -584,6 +1120,66 @@
 					"nullsNotDistinct": false
 				}
 			}
+		},
+		"public.skill": {
+			"checkConstraints": {},
+			"columns": {
+				"category": {
+					"name": "category",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"created_at": {
+					"default": "now()",
+					"name": "created_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"id": {
+					"name": "id",
+					"notNull": true,
+					"primaryKey": true,
+					"type": "text"
+				},
+				"name": {
+					"name": "name",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				},
+				"updated_at": {
+					"name": "updated_at",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "timestamp with time zone"
+				},
+				"user_id": {
+					"name": "user_id",
+					"notNull": true,
+					"primaryKey": false,
+					"type": "text"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"foreignKeys": {
+				"skill_user_id_user_id_fk": {
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"name": "skill_user_id_user_id_fk",
+					"onDelete": "cascade",
+					"onUpdate": "no action",
+					"tableFrom": "skill",
+					"tableTo": "user"
+				}
+			},
+			"indexes": {},
+			"isRLSEnabled": false,
+			"name": "skill",
+			"policies": {},
+			"schema": "",
+			"uniqueConstraints": {}
 		},
 		"public.user": {
 			"checkConstraints": {},

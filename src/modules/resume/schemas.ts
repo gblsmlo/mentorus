@@ -2,12 +2,13 @@ import { z } from 'zod'
 
 // Resume Content Schema - Flexible structure for resume data
 // Note: personalInfo is now managed in userProfile table
+// Note: Experience, Education, Projects, Skills are now in separate tables with many-to-many relationships
 export const resumeContentSchema = z.object({
-	// NEW FIELDS for Step 1 (Resume Info)
-	about: z.string().optional(),
+	// Step 1 fields (Resume Info)
 	competencies: z.array(z.string()).optional().default([]),
 
-	// EXISTING FIELDS
+	// DEPRECATED: These fields will be removed as data moves to normalized tables
+	// Keeping for backward compatibility during migration
 	education: z
 		.array(
 			z.object({
@@ -32,7 +33,7 @@ export const resumeContentSchema = z.object({
 			}),
 		)
 		.default([]),
-	headline: z.string().optional(),
+	headline: z.string().min(1, 'Headline is required'), // Made required, replaces title
 	projects: z
 		.array(
 			z.object({
@@ -54,10 +55,17 @@ export const resumeContentSchema = z.object({
 
 export type ResumeContent = z.infer<typeof resumeContentSchema>
 
-// Resume Creation/Update Schemas
+// Step 1 Schema - Only headline is required
+export const step1Schema = z.object({
+	competencies: z.array(z.string()).optional().default([]),
+	headline: z.string().min(1, 'Headline is required'),
+})
+
+export type Step1Data = z.infer<typeof step1Schema>
+
+// Resume Creation Schema - title removed, headline is in content
 export const createResumeSchema = z.object({
 	content: resumeContentSchema,
-	title: z.string().min(1, 'Resume title is required'),
 })
 
 export type CreateResumeData = z.infer<typeof createResumeSchema>

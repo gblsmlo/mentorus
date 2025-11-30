@@ -12,7 +12,7 @@ import { duplicateResumeAction } from '../actions/duplicate-resume-action'
 
 interface Resume {
 	id: string
-	title: string
+	headline: string
 	currentVersionId: string | null
 	createdAt: Date
 	updatedAt: Date
@@ -27,13 +27,13 @@ export function ResumeList({ resumes, userId }: ResumeListProps) {
 	const router = useRouter()
 	const [duplicating, setDuplicating] = useState<string | null>(null)
 
-	async function handleDuplicate(resumeId: string, title: string) {
-		const newTitle = prompt(`Duplicate "${title}" as:`, `${title} (Copy)`)
-		if (!newTitle) return
+	async function handleDuplicate(resumeId: string, headline: string) {
+		const newHeadline = prompt(`Duplicate "${headline}" as:`, `${headline} (Copy)`)
+		if (!newHeadline) return
 
 		setDuplicating(resumeId)
 		try {
-			await duplicateResumeAction(userId, resumeId, newTitle)
+			await duplicateResumeAction(resumeId, newHeadline)
 			toast.success('Resume duplicated successfully!')
 			router.refresh()
 		} catch (error) {
@@ -69,7 +69,7 @@ export function ResumeList({ resumes, userId }: ResumeListProps) {
 					<CardHeader>
 						<div className="flex items-start justify-between">
 							<div className="flex-1">
-								<CardTitle className="line-clamp-1">{resume.title}</CardTitle>
+								<CardTitle className="line-clamp-1">{resume.headline}</CardTitle>
 								<CardDescription>
 									Updated {formatDistanceToNow(new Date(resume.updatedAt), { addSuffix: true })}
 								</CardDescription>
@@ -89,7 +89,7 @@ export function ResumeList({ resumes, userId }: ResumeListProps) {
 							</div>
 							<Button
 								disabled={duplicating === resume.id}
-								onClick={() => handleDuplicate(resume.id, resume.title)}
+								onClick={() => handleDuplicate(resume.id, resume.headline)}
 								size="sm"
 								variant="ghost"
 							>
